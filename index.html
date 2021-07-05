@@ -82,6 +82,38 @@
         <div class="content-wrapper">
           <div id="content" class="content"><section id="posts" class="posts"><article class="post">
     <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/CQRS%20%E4%B8%8E%20Event%20Sourcing/">CQRS 与 Event Sourcing</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><p>CQRS (Command Query Responsibility Segregation), 命令查询职责分离。CQRS 是一种简单的模式。它将对象的操作分为命令与查询。查询返回数据，不会更改对象的状态。命令更改对象的状态，但不返回任何的数据。</p>
+<p>Event Sourcing (ES, 事件回溯)， 按照 Event Sourcing 的思想， 应用不保存对象的最新状态，而是保存对象产生的所有事件，并且通过事件溯源得到对象的最新状态。</p>
+          <div class="read-more">
+            <a href="/blogs/CQRS%20%E4%B8%8E%20Event%20Sourcing/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/Java%20ServiceLoader/">Java ServiceLoader</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><h2 id="Java-ServiceLoader"><a href="#Java-ServiceLoader" class="headerlink" title="Java ServiceLoader"></a>Java ServiceLoader</h2><p><code>ServiceLoader</code> 在 <code>JDK</code> 源码中的注释如下：</p>
+<blockquote>
+<p>一个简单的服务提供者加载设施。服务 是一个熟知的接口和类（通常为抽象类）集合。服务提供者 是服务的特定实现。提供者中的类通常实现接口，并子类化在服务本身中定义的子类。服务提供者可以以扩展的形式安装在 Java 平台的实现中，也就是将 jar 文件放入任意常用的扩展目录中。也可通过将提供者加入应用程序类路径，或者通过其他某些特定于平台的方式使其可用。</p>
+</blockquote>
+<p>简单来说就是用来加载服务实现类的。首先我们可以先了解一下<code> Java SPI</code>。</p>
+<p>SPI (Service Provider Interface)，是<code>JDK</code>内置的一种服务发现机制，很多框架用它来做服务的扩展发现。</p>
+          <div class="read-more">
+            <a href="/blogs/Java%20ServiceLoader/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
       <h1 class="post-title"><a class="post-link" href="/blogs/%E5%BE%B7%E9%9B%B7%E7%A6%8F%E6%96%AF%E6%8A%80%E8%83%BD%E8%8E%B7%E5%8F%96%E6%A8%A1%E5%9E%8B/">德雷福斯技能获取模型</a>
         </h1>
 
@@ -218,20 +250,11 @@
             <a href="/blogs/%E9%80%9A%E8%BF%87%E6%BA%90%E7%A0%81%E5%88%9D%E6%8E%A2Scala-Future/" class="read-more-link">阅读更多</a>
           </div>
         </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/blogs/Mock%E5%9F%BA%E7%A1%80%E4%B8%8E%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/">Mock基础与简单使用</a>
-        </h1>
-
-      <div class="post-meta"></div>
-    </header>
-
-    <div class="post-content"><h2 id="Mock基础与简单使用"><a href="#Mock基础与简单使用" class="headerlink" title="Mock基础与简单使用"></a>Mock基础与简单使用</h2><h4 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h4><p>“Mock” 意味着模仿或者效仿。在软件开发的测试过程中,对于某些不容易构造或者不容易获取的对象，可以创建一个虚拟的对象来便于测试。这种测试方法称为mock测试。</p>
-          <div class="read-more">
-            <a href="/blogs/Mock%E5%9F%BA%E7%A1%80%E4%B8%8E%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <nav class="pagination"></nav></section></div></div>
+      <nav class="pagination"><a class="next" href="/page/2/">
+        <span class="next-text">下一页</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></section></div></div>
       </main>
 
       <footer id="footer" class="footer"><div class="social-links"><a href="mailto:niuzaishu@gmail.com" class="iconfont icon-email" title="email"></a>

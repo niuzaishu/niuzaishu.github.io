@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="Java ServiceLoader"/><link rel="alternate" href="/default" title="小牛" ><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://niuzaishu.top/blogs/Java ServiceLoader/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>Java ServiceLoader - 小牛</title>
+  <meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">小牛</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a><a href="/archives/">
+        <li class="mobile-menu-item">归档
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">小牛</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            归档
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">Java ServiceLoader
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Java-ServiceLoader"><span class="toc-text">Java ServiceLoader</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SPI-%E7%BA%A6%E5%AE%9A"><span class="toc-text">SPI 约定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SPI-%E5%B8%B8%E8%A7%81%E5%AE%9E%E4%BE%8B"><span class="toc-text">SPI 常见实例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ServiceLoader-%E5%8A%A0%E8%BD%BD"><span class="toc-text">ServiceLoader 加载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ServiceLoader-%E4%B8%8E-%E7%B1%BB%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F"><span class="toc-text">ServiceLoader 与 类责任链模式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E6%8E%A5%E5%8F%A3"><span class="toc-text">定义接口</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0%E7%B1%BB"><span class="toc-text">定义实现类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%9C%8D%E5%8A%A1"><span class="toc-text">配置服务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8A%A0%E8%BD%BD%E6%9C%8D%E5%8A%A1"><span class="toc-text">加载服务</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></li></ol>
+    </div>
+  </div><div class="post-content"><h2 id="Java-ServiceLoader"><a href="#Java-ServiceLoader" class="headerlink" title="Java ServiceLoader"></a>Java ServiceLoader</h2><p><code>ServiceLoader</code> 在 <code>JDK</code> 源码中的注释如下：</p>
+<blockquote>
+<p>一个简单的服务提供者加载设施。服务 是一个熟知的接口和类（通常为抽象类）集合。服务提供者 是服务的特定实现。提供者中的类通常实现接口，并子类化在服务本身中定义的子类。服务提供者可以以扩展的形式安装在 Java 平台的实现中，也就是将 jar 文件放入任意常用的扩展目录中。也可通过将提供者加入应用程序类路径，或者通过其他某些特定于平台的方式使其可用。</p>
+</blockquote>
+<p>简单来说就是用来加载服务实现类的。首先我们可以先了解一下<code> Java SPI</code>。</p>
+<p>SPI (Service Provider Interface)，是<code>JDK</code>内置的一种服务发现机制，很多框架用它来做服务的扩展发现。</p>
+<span id="more"></span>
+
+<h3 id="SPI-约定"><a href="#SPI-约定" class="headerlink" title="SPI 约定"></a>SPI 约定</h3><ol>
+<li>在 <code>META-INF/services/</code> 目录中创建文件，以接口全限定名命名。并且文件内容为接口实现类的全限定名</li>
+<li>使用 <code>ServiceLoader</code> 动态加载配置的实现类</li>
+<li>如果实现类为<code>Jar</code>, 需要将其放在主程序classPath 中</li>
+<li>接口实现类必须有一个无参构造方法</li>
+</ol>
+<h3 id="SPI-常见实例"><a href="#SPI-常见实例" class="headerlink" title="SPI 常见实例"></a>SPI 常见实例</h3><p><img src="https://niuzaishu.oss-cn-shanghai.aliyuncs.com/img/blog/image.png" alt="img"></p>
+<p>如上图所示，阿里的 <code>druid</code> 数据库连接池就使用了SPI 机制。有两个接口全限定名命名的文件 <code>com.sun.tools.jconsole.JConsolePlugin</code> 和 <code>java.sql.Driver</code>， 用来定义监控和驱动。</p>
+<p>以 <code>java.sql.Driver</code> 为例，文件内定义了两个实现类</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">com.alibaba.druid.proxy.DruidDriver</span><br><span class="line">com.alibaba.druid.mock.MockDriver</span><br></pre></td></tr></table></figure>
+
+<p>将接口和实现类定义之后，通过<code>ServiceLoader </code>中的方法来进行加载</p>
+<h3 id="ServiceLoader-加载"><a href="#ServiceLoader-加载" class="headerlink" title="ServiceLoader 加载"></a>ServiceLoader 加载</h3><p><code>ServiceLoader </code>通过返回一个 <code>Iterator </code>对象来实现服务实例的懒加载，只有当调用 <code>iterator.next()</code>方法时才会实例化下一个服务实例，只有需要使用的时候才进行实例化。</p>
+<p>源码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">private S nextService() &#123;</span><br><span class="line">         if (!hasNextService())</span><br><span class="line">             throw new NoSuchElementException();</span><br><span class="line">         // 上一步找到的服务实现者全限定名</span><br><span class="line">         String cn = nextName;</span><br><span class="line">         nextName = null;</span><br><span class="line">         Class&lt;?&gt; c = null;</span><br><span class="line">         try &#123;</span><br><span class="line">         // 加载字节码返回class对象.但并不去初始化</span><br><span class="line">             c = Class.forName(cn, false, loader);</span><br><span class="line">         &#125; catch (ClassNotFoundException x) &#123;</span><br><span class="line">             fail(service,</span><br><span class="line">                  &quot;Provider &quot; + cn + &quot; not found&quot;);</span><br><span class="line">         &#125;</span><br><span class="line">         if (!service.isAssignableFrom(c)) &#123;</span><br><span class="line">             fail(service,</span><br><span class="line">                  &quot;Provider &quot; + cn  + &quot; not a subtype&quot;);</span><br><span class="line">         &#125;</span><br><span class="line">         try &#123;</span><br><span class="line">             // 初始化实现类</span><br><span class="line">             S p = service.cast(c.newInstance());</span><br><span class="line">             //本地缓存 （全限定名，实现类对象）</span><br><span class="line">             providers.put(cn, p);</span><br><span class="line">             return p;</span><br><span class="line">         &#125; catch (Throwable x) &#123;</span><br><span class="line">             fail(service,</span><br><span class="line">                  &quot;Provider &quot; + cn + &quot; could not be instantiated&quot;,</span><br><span class="line">                  x);</span><br><span class="line">         &#125;</span><br><span class="line">         throw new Error();          // This cannot happen</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="ServiceLoader-与-类责任链模式"><a href="#ServiceLoader-与-类责任链模式" class="headerlink" title="ServiceLoader 与 类责任链模式"></a>ServiceLoader 与 类责任链模式</h3><p>在日常的业务需求中，有时需要对数据进行链式的处理。如需要对用户的账单进行折扣处理，有会员折扣、公司折扣等等，这时可以使用责任链模式来进行编码。而 ServiceLoader 则可以用来辅助类责任链模式的实现，</p>
+<h4 id="定义接口"><a href="#定义接口" class="headerlink" title="定义接口"></a>定义接口</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public interface Handler &#123;</span><br><span class="line">    void process();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="定义实现类"><a href="#定义实现类" class="headerlink" title="定义实现类"></a>定义实现类</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public class MemberShipHandler implements Handler &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void process() &#123;</span><br><span class="line">        System.out.println(&quot;会员折扣&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class CompanyHandler implements Handler &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void process() &#123;</span><br><span class="line">        System.out.println(&quot;公司折扣&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="配置服务"><a href="#配置服务" class="headerlink" title="配置服务"></a>配置服务</h4><p><img src="https://niuzaishu.oss-cn-shanghai.aliyuncs.com/img/blog/image-20210706014258180.png" alt="img"></p>
+<p>如图，在 <code>META-INF.services</code> 下配置名为 <code>com.nzs.spi.Handler</code>的文件。文件内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">com.nzs.spi.CompanyHandler</span><br><span class="line">com.nzs.spi.MemberShipHandler</span><br></pre></td></tr></table></figure>
+<h4 id="加载服务"><a href="#加载服务" class="headerlink" title="加载服务"></a>加载服务</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        ServiceLoader&lt;Handler&gt; processors = ServiceLoader.load(Handler.class);</span><br><span class="line">        Iterator&lt;Handler&gt; iterator = processors.iterator();</span><br><span class="line">        while (iterator.hasNext()) &#123;</span><br><span class="line">            iterator.next().process();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>ServiceLoader </code>以延迟方式查找和实例化服务提供者，常用在 SPI 机制中。</p>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://niuzaishu.top">xiao niu</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://niuzaishu.top/blogs/Java%20ServiceLoader/">https://niuzaishu.top/blogs/Java%20ServiceLoader/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        
+        <nav class="post-nav"><a class="prev" href="/blogs/CQRS%20%E4%B8%8E%20Event%20Sourcing/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">CQRS 与 Event Sourcing</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    <a class="next" href="/blogs/%E5%BE%B7%E9%9B%B7%E7%A6%8F%E6%96%AF%E6%8A%80%E8%83%BD%E8%8E%B7%E5%8F%96%E6%A8%A1%E5%9E%8B/">
+        <span class="next-text nav-default">德雷福斯技能获取模型</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:niuzaishu@gmail.com" class="iconfont icon-email" title="email"></a>
+        <a target="_blank" rel="noopener" href="https://github.com/niuzaishu" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2021<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">xiao niu</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>
