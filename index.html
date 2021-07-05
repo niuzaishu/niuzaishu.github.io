@@ -74,6 +74,75 @@
         <div class="content-wrapper">
           <div id="content" class="content"><section id="posts" class="posts"><article class="post">
     <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/%E5%BE%B7%E9%9B%B7%E7%A6%8F%E6%96%AF%E6%8A%80%E8%83%BD%E8%8E%B7%E5%8F%96%E6%A8%A1%E5%9E%8B/">德雷福斯技能获取模型</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><h2 id="德雷福斯技能获取模型"><a href="#德雷福斯技能获取模型" class="headerlink" title="德雷福斯技能获取模型"></a>德雷福斯技能获取模型</h2><p>德雷福斯模型是一种衡量人们工作方法和能力,反省并提高专业技能的层级模型。</p>
+<p>20世纪70年代德雷福斯兄弟想要推动人工智能的技术发展水平，准备编写一个能够像人类一样学习和获取技能的软件（或者证明这根本不可行）。为了实现这个目标，他们通过研究人类是学习历程。提出了德雷福斯技能获取模型，概括了从新手到专家必须经历的5个阶段。并且这个模型已经被证实是行之有效的</p>
+          <div class="read-more">
+            <a href="/blogs/%E5%BE%B7%E9%9B%B7%E7%A6%8F%E6%96%AF%E6%8A%80%E8%83%BD%E8%8E%B7%E5%8F%96%E6%A8%A1%E5%9E%8B/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/%E5%8A%A0%E5%AF%86%E3%80%81%E7%AD%BE%E5%90%8D%E4%B8%8ETOKEN/">加密、签名与TOKEN</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><h2 id="加密、签名与TOKEN"><a href="#加密、签名与TOKEN" class="headerlink" title="加密、签名与TOKEN"></a>加密、签名与TOKEN</h2><p>在 api 接口的开发中，经常会遇到下面三个名词：加密、签名、Token。下面会对其进行介绍。</p>
+<h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>首先可以把他们分成两个层面：</p>
+<ul>
+<li>Token: 用来保持状态</li>
+<li>加密、签名：用来保证接口安全</li>
+</ul>
+          <div class="read-more">
+            <a href="/blogs/%E5%8A%A0%E5%AF%86%E3%80%81%E7%AD%BE%E5%90%8D%E4%B8%8ETOKEN/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/%E4%BB%8E%20ThreadLocal%20%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%9C%8B%E6%95%A3%E5%88%97%E7%AE%97%E6%B3%95/">从 ThreadLocal 的实现看散列算法</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>最近在看 JDK 的 <code>ThreadLocal</code> 源码时，发现了一段有意思的代码，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> threadLocalHashCode = nextHashCode();</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">   * The difference between successively generated hash codes - turns</span></span><br><span class="line"><span class="comment">   * implicit sequential thread-local IDs into near-optimally spread</span></span><br><span class="line"><span class="comment">   * multiplicative hash values for power-of-two-sized tables.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> HASH_INCREMENT = <span class="number">0x61c88647</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Returns the next hash code.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">nextHashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> nextHashCode.getAndAdd(HASH_INCREMENT);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>可以看到，其中定义了一个魔法值 <code>HASH_INCREMENT = 0x61c88647</code>, 对于实例变量 <code>threadLocalHashCode</code>, 每当创建 <code>ThreadLocal</code> 实例时这个值都会 <code>getAndAdd(0x61c88647)</code>。</p>
+<p><code>0x61c88647</code> 转化成二进制即为 <code>1640531527</code>，它常用于在散列中增加哈希值。上面的代码注释中也解释到：<code>HASH_INCREMENT</code> 是为了让哈希码能均匀的分布在2的N次方的数组里。</p>
+<p>那么 <code>0x61c88647</code> 是怎么起作用的呢？</p>
+          <div class="read-more">
+            <a href="/blogs/%E4%BB%8E%20ThreadLocal%20%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%9C%8B%E6%95%A3%E5%88%97%E7%AE%97%E6%B3%95/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/Spring%20%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">Spring 事务隔离级别</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><h3 id="Spring-事务隔离级别"><a href="#Spring-事务隔离级别" class="headerlink" title="Spring 事务隔离级别"></a>Spring 事务隔离级别</h3><h4 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h4><p>事务逻辑上的一组操作，组成这组操作的各个逻辑单元，要么一起成功，要么一起失败。</p>
+<h4 id="事务特性-ACID"><a href="#事务特性-ACID" class="headerlink" title="事务特性 ACID"></a>事务特性 ACID</h4><ul>
+<li>原子性（Atomicity）：不可分割，事务是不可分割的最小工作单元，事务内的操作要么全做，要么全不对。</li>
+<li>一致性（Consistency）：事务的执行前后数据的完整性保持一致。</li>
+<li>隔离性（Isolation）：并发事务执行之间互不影响，在一个事务内部的操作对其他事务是不产生影响的。</li>
+<li>持久性（Durability）：事务一旦执行成功，它对数据库的改变必须是永久的</li>
+</ul>
+          <div class="read-more">
+            <a href="/blogs/Spring%20%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
       <h1 class="post-title"><a class="post-link" href="/blogs/%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/">策略模式</a>
         </h1>
 
