@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="Mock基础与简单使用"/><link rel="alternate" href="/default" title="小牛" ><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://niuzaishu.top/blogs/Mock基础与简单使用/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>Mock基础与简单使用 - 小牛</title>
+  <meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">小牛</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">小牛</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">Mock基础与简单使用
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Mock%E5%9F%BA%E7%A1%80%E4%B8%8E%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8"><span class="toc-text">Mock基础与简单使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A6%82%E5%BF%B5"><span class="toc-text">概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-text">应用场景</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%8E%9F%E5%88%99"><span class="toc-text">应用原则</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A5%BD%E5%A4%84"><span class="toc-text">好处</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7"><span class="toc-text">常用工具</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mokito"><span class="toc-text">Mokito</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%81%E7%A8%8B"><span class="toc-text">流程</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%85%B3%E4%BA%8Estub"><span class="toc-text">关于stub</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-text">实现原理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#scala-%E4%B8%AD%E7%9A%84%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="toc-text">scala 中的单元测试</span></a></li></ol></li></ol>
+    </div>
+  </div><div class="post-content"><h2 id="Mock基础与简单使用"><a href="#Mock基础与简单使用" class="headerlink" title="Mock基础与简单使用"></a>Mock基础与简单使用</h2><h4 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h4><p>“Mock” 意味着模仿或者效仿。在软件开发的测试过程中,对于某些不容易构造或者不容易获取的对象，可以创建一个虚拟的对象来便于测试。这种测试方法称为mock测试。</p>
+<span id="more"></span>
+
+<h4 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h4><ol>
+<li>单元测试/接口测试中测试对象依赖其他对象，这些对象的构造复杂、耗时或者根本无法构造(未交付)  </li>
+<li>只测试对象内部逻辑的质量，不关心依赖对象的逻辑正确性和稳定性 </li>
+</ol>
+<h4 id="应用原则"><a href="#应用原则" class="headerlink" title="应用原则"></a>应用原则</h4><ol>
+<li>不需要对所有的依赖对象进行mock，只需对那些构造复杂、构造耗时较长的依赖进行mock  </li>
+<li>如果做分层自动化，高层的测试设计可以基于以下假设：</li>
+</ol>
+<blockquote>
+<p>低层的测试已保证低层对象的质量，高层对低层的依赖可以mock，无需关心所依赖的低层对象的内部逻辑质量 </p>
+</blockquote>
+<h4 id="好处"><a href="#好处" class="headerlink" title="好处"></a><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/77db26b4fb54">好处</a></h4><ol>
+<li>提前创建测试，TDD（测试驱动开发）</li>
+<li>团队可以并行工作</li>
+<li>你可以创建一个验证或者演示程序。</li>
+<li>为无法访问的资源编写测试</li>
+<li>Mock可以交给用户</li>
+<li>隔离系统</li>
+</ol>
+<h4 id="常用工具"><a href="#常用工具" class="headerlink" title="常用工具"></a>常用工具</h4><p>Java 常用 EasyMock 和 Mockito</p>
+<p>本文主要介绍 Mokito</p>
+<h3 id="Mokito"><a href="#Mokito" class="headerlink" title="Mokito"></a><a target="_blank" rel="noopener" href="https://github.com/mockito/mockito">Mokito</a></h3><p>Mockito 是一个基于MIT协议的开源java测试框架。</p>
+<h4 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h4><p>一次完整的Mock，包括</p>
+<ol>
+<li>设定目标</li>
+<li>设置消费条件</li>
+<li>预期返回结果</li>
+<li>消费并检验返回结果</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">when(productService.getProductInfo(any())).thenAnswer(invocationOnMock -&gt; &#123;</span><br><span class="line">                List&lt;ProductInfo&gt; productInfos = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">                <span class="keyword">return</span> productInfos;</span><br><span class="line">            &#125;);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//...        </span></span><br><span class="line">    List&lt;ProductInfo&gt; productInfos  = productService.getProductInfo(<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>以上述代码为例：</p>
+<ul>
+<li>设定目标 -&gt; <code>List&lt;ProductInfo&gt; productInfos</code></li>
+<li>设置消费条件 -&gt; <code>productService.getProductInfo(any())</code></li>
+<li>预期返回结果 -&gt; <code>thenAnswer(...)</code></li>
+<li>消费并检验返回结果 -&gt; <code>productService.getProductInfo(1)</code></li>
+</ul>
+<p>上例中，Mockito主要就是通过Stub“打桩”，通过方法名加参数来准确的定位测试桩，然后返回预期的值。</p>
+<h6 id="关于stub"><a href="#关于stub" class="headerlink" title="关于stub"></a>关于stub</h6><blockquote>
+<p>stub 并不等同于mock,通常一定程度上，我们可以认为mock 包含 stub。或者说mock 是功能更为丰富的stub。（可以这样认为，但实际上并不准确）</p>
+</blockquote>
+<p>mock 和 stub 还是有比较明显的差异的：</p>
+<blockquote>
+<p>mock: 关注行为验证。细粒度的测试，即代码的逻辑，通常是针对设定好的调用方法与需要响应的参数封装出合适的对象。</p>
+<p>stub: 关注状态验证。粗粒度的测试，通常用于在测试中提供封装好的响应。</p>
+</blockquote>
+<h4 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h4><p>Mock本质上是一个Proxy代理模式的应用。</p>
+<blockquote>
+<p>Proxy模式，是在对象提供一个proxy对象，所有对真实对象的调用，都先经过proxy对象，然后由proxy对象根据情况，决定相应的处理，它可以直接做一个自己的处理，也可以再调用真实对象对应的方法。</p>
+</blockquote>
+<p>所以Mockito本质上就是：在代理对象调用方法前，用stub的方式设置其返回值，然后在真实调用时，用代理对象返回起预设的返回值。</p>
+<h3 id="scala-中的单元测试"><a href="#scala-中的单元测试" class="headerlink" title="scala 中的单元测试"></a>scala 中的单元测试</h3><p>PlayFrameWork 中推荐的也是常用的单元测试工具：ScalaTest 和 Specs2。<br>两者都包含了Mock相关的模块，并且都是基于Mockito 实现的。</p>
+<p>下面是一个 Play 项目使用 Specs2 中Mock 的例子</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NestleTest</span> <span class="keyword">extends</span> <span class="title">Specification</span> <span class="keyword">with</span> <span class="title">Mockito</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="string">&quot;get indicator history&quot;</span> should &#123;</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;recive some json&quot;</span> in <span class="keyword">new</span> <span class="type">WithApplication</span> &#123;</span><br><span class="line">      <span class="comment">// 注入</span></span><br><span class="line">		...</span><br><span class="line">		...</span><br><span class="line">      <span class="keyword">val</span> loginPropRepository = app.injector.instanceOf[<span class="type">LoginPropRepository</span>]</span><br><span class="line"></span><br><span class="line">      <span class="comment">// mock</span></span><br><span class="line">      <span class="comment">// 使用spy 不影响services的其他方法</span></span><br><span class="line">      <span class="keyword">val</span> mockService = spy(indicatorServices)</span><br><span class="line">      <span class="keyword">val</span> mockFacade = <span class="keyword">new</span> <span class="type">IndicatorFacade</span>(mockService, loginRepo, loginPropRepository, propertyServices)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="keyword">val</span> controller = <span class="keyword">new</span> <span class="type">NestleController</span>(xrAuth, loginRepo, loginServices,</span><br><span class="line">        subscriptionServices, surveyServices, mockFacade, mockService)</span><br><span class="line"></span><br><span class="line">      mockService.getGroupRecord(<span class="number">2297918</span>,</span><br><span class="line">        <span class="type">StandardIndicatorGroup</span>(<span class="number">1</span>, <span class="string">&quot;Fenton生长曲线图-男宝宝&quot;</span>, <span class="string">&quot;周数&quot;</span>)) returns <span class="type">List</span>()</span><br><span class="line">      </span><br><span class="line">      <span class="keyword">val</span> fakeRequest = <span class="type">FakeRequest</span>().withSession(<span class="string">&quot;loginId&quot;</span> -&gt; <span class="string">&quot;2297918&quot;</span>)</span><br><span class="line"></span><br><span class="line">      <span class="keyword">val</span> result = controller.indicatorHistoryAjax(<span class="number">1</span>, <span class="number">30</span>).apply(fakeRequest)</span><br><span class="line"></span><br><span class="line">      <span class="keyword">val</span> resultAsString = contentAsString(result)</span><br><span class="line">      println(<span class="string">&quot;result like&quot;</span> + resultAsString)</span><br><span class="line">      resultAsString must contain(<span class="string">&quot;&quot;&quot;&quot;success&quot;:true&quot;&quot;&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>例中的spy(), 其实就是部分mock。</p>
+<p>本例测试了获取指标记录的流程。原本需要通过调用远程服务获取的记录数据。假设此时服务暂时无法访问，但是需要测试整体流程，这时就可以使用Mock,可以mock一个“获取记录”的方法以便测试。</p>
+<p>本例中就通过mock service 中的 getGroupRecord方法（因为模拟的是一个远程服务的响应数据，更准确的描述应该是“stub”），来获取一个事先定义好的指标记录。</p>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://niuzaishu.top">xiao niu</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://niuzaishu.top/blogs/Mock%E5%9F%BA%E7%A1%80%E4%B8%8E%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/">https://niuzaishu.top/blogs/Mock%E5%9F%BA%E7%A1%80%E4%B8%8E%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        
+        <nav class="post-nav"><a class="prev" href="/blogs/%E9%80%9A%E8%BF%87%E6%BA%90%E7%A0%81%E5%88%9D%E6%8E%A2Scala-Future/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">通过源码初探Scala Future</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:niuzaishu@gmail.com" class="iconfont icon-email" title="email"></a>
+        <a target="_blank" rel="noopener" href="https://github.com/niuzaishu" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2021<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">xiao niu</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>

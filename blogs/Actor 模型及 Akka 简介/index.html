@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="Actor 模型及 Akka 简介"/><link rel="alternate" href="/default" title="小牛" ><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://niuzaishu.top/blogs/Actor 模型及 Akka 简介/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>Actor 模型及 Akka 简介 - 小牛</title>
+  <meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">小牛</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">小牛</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">Actor 模型及 Akka 简介
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E6%8F%90"><span class="toc-text">前提</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B1%E4%BA%AB%E6%95%B0%E6%8D%AE"><span class="toc-text">共享数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92"><span class="toc-text">消息传递</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Actor-%E6%A8%A1%E5%9E%8B"><span class="toc-text">Actor 模型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E6%A6%82%E5%BF%B5"><span class="toc-text">模型概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Actor-%E6%A8%A1%E5%9E%8B%E7%89%B9%E7%82%B9"><span class="toc-text">Actor 模型特点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Akka-Actor"><span class="toc-text">Akka Actor</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ActorSystem"><span class="toc-text">ActorSystem</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Actor-%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="toc-text">Actor 层次结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Actor-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-text">Actor 生命周期</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ActorRef"><span class="toc-text">ActorRef</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Dispatcher-%E5%92%8C-MailBox"><span class="toc-text">Dispatcher 和 MailBox</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%81%E7%A8%8B"><span class="toc-text">流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#EventBus-%E5%AE%9A%E4%B9%89"><span class="toc-text">EventBus 定义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8B%E4%BB%B6%E5%8F%91%E5%B8%83%E5%92%8C%E8%AE%A2%E9%98%85"><span class="toc-text">事件发布和订阅</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </div><div class="post-content"><h3 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h3><p>随着业务的发展，现代分布式系统对于垂直扩展、水平扩展、容错性的要求越来越高。常见的一些编程模式已经不能很好的解决这些问题。</p>
+<p>解决并发问题核心是并发线程中的数据通讯问题，一般有两种策略：</p>
+<ol>
+<li>共享数据</li>
+<li>消息传递</li>
+</ol>
+<span id="more"></span>
+
+<h4 id="共享数据"><a href="#共享数据" class="headerlink" title="共享数据"></a>共享数据</h4><p>基于 JVM 内存模型的设计，需要通过加锁等同步机制保证共享数据的一致性。但其实使用锁对于高并发系统并不是一个很好的解决方案：</p>
+<ol>
+<li>运行低效，代价昂贵，非常限制并发。</li>
+<li>调用线程会被阻塞，以致于它不能去做其他有意义的任务。</li>
+<li>很难实现，比较容易出现死锁等各种问题。</li>
+</ol>
+<h4 id="消息传递"><a href="#消息传递" class="headerlink" title="消息传递"></a>消息传递</h4><p>与共享数据方式相比，消息传递机制的最大优点就是不会产生竞争。实现消息传递的两种常见形式：</p>
+<ol>
+<li>基于 Channel 的消息传递</li>
+<li>基于 Actor 模型的消息传递</li>
+</ol>
+<p>常见的 RabbitMQ 等消息队列，都可以认为是基于 Channel 的消息传递模式，而本文主要会介绍 Actor 模型相关内容。</p>
+<h3 id="Actor-模型"><a href="#Actor-模型" class="headerlink" title="Actor 模型"></a>Actor 模型</h3><p>Actor 的基础就是消息传递，一个 Actor 可以认为是一个基本的计算单元，它能接收消息并基于其执行运算，它也可以发送消息给其他 Actor。Actors 之间相互隔离，它们之间并不共享内存。</p>
+<p>Actor 本身封装了状态和行为，在进行并发编程时，Actor 只需要关注消息和它本身。而消息是一个不可变对象，所以 Actor 不需要去关注锁和内存原子性等一系列多线程常见的问题。</p>
+<p>所以 Actor 是由状态（State）、行为（Behavior）和邮箱（MailBox，可以认为是一个消息队列）三部分组成：</p>
+<ol>
+<li>状态：Actor 中的状态指 Actor 对象的变量信息，状态由 Actor 自己管理，避免了并发环境下的锁和内存原子性等问题。</li>
+<li>行为：Actor 中的计算逻辑，通过 Actor 接收到的消息来改变 Actor 的状态。</li>
+<li>邮箱：邮箱是 Actor 和 Actor 之间的通信桥梁，邮箱内部通过 FIFO（先入先出）消息队列来存储发送方 Actor 消息，接受方 Actor 从邮箱队列中获取消息。</li>
+</ol>
+<h4 id="模型概念"><a href="#模型概念" class="headerlink" title="模型概念"></a>模型概念</h4><p><img src="https://niuzaishu.oss-cn-shanghai.aliyuncs.com/img/blog/640.jpeg" alt="图片"></p>
+<p>可以看出按消息的流向，可以将 Actor 分为发送方和接收方，一个 Actor 既可以是发送方也可以是接受方。</p>
+<p>另外我们可以了解到 Actor 是串行处理消息的，另外 Actor 中消息不可变。</p>
+<h4 id="Actor-模型特点"><a href="#Actor-模型特点" class="headerlink" title="Actor 模型特点"></a>Actor 模型特点</h4><ol>
+<li>对并发模型进行了更高的抽象。</li>
+<li>使用了异步、非阻塞、高性能的事件驱动编程模型。</li>
+<li>轻量级事件处理（1 GB 内存可容纳百万级别 Actor）。</li>
+</ol>
+<p>简单了解了 Actor 模型，我们来看一个基于其实现的框架。</p>
+<h3 id="Akka-Actor"><a href="#Akka-Actor" class="headerlink" title="Akka Actor"></a>Akka Actor</h3><p>Akka 是一个构建在 JVM 上，基于 Actor 模型的的并发框架，为构建伸缩性强，有弹性的响应式并发应用提高更好的平台。</p>
+<h4 id="ActorSystem"><a href="#ActorSystem" class="headerlink" title="ActorSystem"></a>ActorSystem</h4><p>ActorSystem 可以看做是 Actor 的系统工厂或管理者。主要有以下功能：</p>
+<ul>
+<li>管理调度服务</li>
+<li>配置相关参数</li>
+<li>日志功能</li>
+</ul>
+<h4 id="Actor-层次结构"><a href="#Actor-层次结构" class="headerlink" title="Actor 层次结构"></a>Actor 层次结构</h4><p>Akka 官网展示的 Actor 层次结构示意图<br><img src="https://niuzaishu.oss-cn-shanghai.aliyuncs.com/img/blog/actor_top_tree.png"></p>
+<p>Akka 有在系统中初始化三个 Actor:</p>
+<ol>
+<li><code>/</code> 所谓的根监护人。这是系统中所有 Actor 的父亲，当系统被终止时，它也是最后一个被停止的。</li>
+<li><code>/user</code> 这是所有用户创建的 Actor 的父亲。不要被 user 这个名字所迷惑，他与最终用户没有关系，也和用户处理无关。你使用 Akka 库所创建的所有 Actor 的路径都将以<code>/user/</code>开头 </li>
+<li><code>/system</code>系统监护人</li>
+</ol>
+<p>我们可以使用 <code>system.actorOf()</code> 来创建一个在 <code>/user</code> 路径下的 Actor。尽管它只是在用户创建的层次的最高级 Actor，但是我们把它称作顶级 Actor。</p>
+<p>Akka 里的 Actor 总是属于其父母。可以通过调用 <code>context.actorOf()</code> 创建一个 Actor。这种方式向现有的 Actor 树内加入了一个新的 Actor，这个 Actor 的创建者就成为了这个 Actor 的父 Actor。</p>
+<h4 id="Actor-生命周期"><a href="#Actor-生命周期" class="headerlink" title="Actor 生命周期"></a>Actor 生命周期</h4><p>Akka Actor 生命周期示意图<br><img src="https://niuzaishu.oss-cn-shanghai.aliyuncs.com/img/blog/640.png" alt="图片">Actor 在被创建后存在，并且在用户请求关闭时消失。当 Actor 被关闭后，其所有的子Actor 都将被依次地关闭.</p>
+<p>AKKA 为 Actor 生命周期的每个阶段都提供了钩子（hook）方法，我们可以通过重写这些方法来管理 Actor 的生命周期。</p>
+<p>Actor 被定义为 trait，可以认为就是一个接口，其中一个典型的方法对是 <code>preStart()</code> 与 <code>postStop()</code>，顾名思义，两个方法分别在启动和停止时被调用。 </p>
+<h4 id="ActorRef"><a href="#ActorRef" class="headerlink" title="ActorRef"></a>ActorRef</h4><p>在使用 <code>system.actorOf()</code> 创建 Actor 时，其实返回的是一个 ActorRef 对象。</p>
+<p>ActorRef 可以看做是 Actor 的引用，是一个 Actor 的不可变，可序列化的句柄（handle），它可能不在本地或同一个 ActorSystem 中，它是实现网络空间位置透明性的关键设计。 </p>
+<p>ActorRef 最重要功能是支持向它所代表的 Actor 发送消息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ref ! message</span><br></pre></td></tr></table></figure>
+
+<h4 id="Dispatcher-和-MailBox"><a href="#Dispatcher-和-MailBox" class="headerlink" title="Dispatcher 和 MailBox"></a>Dispatcher 和 MailBox</h4><p>ActorRef 将消息处理能力委派给 Dispatcher，实际上，当我们创建 ActorSystem 和 ActorRef 时，Dispatcher 和 MailBox 就已经被创建了。</p>
+<p>Dispatcher 从 ActorRef 中获取消息并传递给 MailBox，Dispatcher 封装了一个线程池，之后在线程池中执行 MailBox。</p>
+<blockquote>
+<p>因为 MailBox 实现了 Runnable 接口，所以可以通过 Java 的线程池调用。</p>
+</blockquote>
+<h4 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h4><p>通过了解上面的一些概念，我们可以 Akka Actor 的处理流程归纳如下：</p>
+<ol>
+<li>创建 ActorSystem</li>
+<li>通过 ActorSystem 创建 ActorRef，并将消息发送到 ActorRef</li>
+<li>ActorRef 将消息传递到 Dispatcher中</li>
+<li>Dispatcher 依次的将消息发送到 Actor 邮箱中</li>
+<li>Dispatcher 将邮箱推送至一个线程中</li>
+<li>邮箱取出一条消息并委派给 Actor 的 receive 方法</li>
+</ol>
+<p>简略流程图如下：<br><img src="https://niuzaishu.oss-cn-shanghai.aliyuncs.com/img/blog/640-20210706010501302.png" alt="图片">EventBus</p>
+<p>接下来我们看一个 Actor 的应用：EventBus。在异步处理场景下，运用最为广泛的消息处理模式即是 Pub-Sub 模式。基于 Pub-Sub 模式，还可以根据不同的场景衍生出特殊的模式，例如针对一个 Publisher 和多个 Subscriber，演化为 Broadcast 模式和 Message Router 模式。</p>
+<p>EventBus 则通过引入总线来彻底解除 Publisher 与 Subscriber 之间的耦合，类似设计模式中的 Mediator 模式。总线就是 Mediator，用以协调 Publisher 与 Subscriber 之间的关系。对于 Publisher 而言，只需要把消息发布给 EventBus 即可；对于 Subscriber 而言，只需要在 EventBus 注册需要处理的事件并实现处理流程即可。</p>
+<p>在没有使用 EventBus 的时候，Publisher 必须显式的调用 Subscriber 的方法。例如订单支付成功后，必须在订单处理模块调用积分模块处理积分，调用服务号模块进行通知。而且这样的显示调用会越来越多，每次都要去修改订单模块加一个调用。这样订单处理模块和那些模块就都紧密耦合在一起了。我们看看 EventBus 怎么解决这个问题。</p>
+<h4 id="EventBus-定义"><a href="#EventBus-定义" class="headerlink" title="EventBus 定义"></a>EventBus 定义</h4><p>要使用 Akka EventBus， 首先要实现一个 EventBus 接口。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">trait EventBus &#123;</span><br><span class="line">  type Event</span><br><span class="line">  type Classifier</span><br><span class="line">  type Subscriber</span><br><span class="line"></span><br><span class="line">  //#event-bus-api</span><br><span class="line">  def subscribe(subscriber: Subscriber, to: Classifier): Boolean</span><br><span class="line"></span><br><span class="line">  def unsubscribe(subscriber: Subscriber, from: Classifier): Boolean</span><br><span class="line"></span><br><span class="line">  def unsubscribe(subscriber: Subscriber): Unit</span><br><span class="line"></span><br><span class="line">  def publish(event: Event): Unit</span><br><span class="line">  //#event-bus-api</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上所示：</p>
+<ol>
+<li>Event 就是需要发布到总线上的事件</li>
+<li>Classifier 分类器用于对订阅者进行绑定和筛选</li>
+<li>Subscriber 注册到总线上的订阅者。</li>
+</ol>
+<p>所幸的是，我们不需要要从头实现 EventBus 接口，Akka 提供了一个 LookupClassification 帮助我们实现 Pub-Sub 模式，我们要做的最主要就是实现 publish 方法。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">class XrEventBus extends EventBus with LookupClassification &#123;</span><br><span class="line">  type Event = XrEvent</span><br><span class="line">  type Classifier = XrEventType</span><br><span class="line">  type Subscriber = ActorRef</span><br><span class="line"></span><br><span class="line">  override protected def publish(event: Event, subscriber: Subscriber): Unit = &#123;</span><br><span class="line">    subscriber ! event</span><br><span class="line">  &#125;</span><br><span class="line">  // 其他方法...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到：</p>
+<ol>
+<li>Event 的类型是我们自己定义的 XrEvent。</li>
+<li>分类起是基于 XrEventType，也就是事件类型的。我们系统中定义了很多时间类型，例如 XrEventType.ORDER_PAID 是订单支付事件，XrEventType.DOC_REGISTERED 是用户注册事件。</li>
+<li>Subscriber 其实就是一个 Actor。</li>
+<li>Publisher 只是简单的将 Event 作为一个消息发布给所有 Subscriber。</li>
+</ol>
+<h4 id="事件发布和订阅"><a href="#事件发布和订阅" class="headerlink" title="事件发布和订阅"></a>事件发布和订阅</h4><p>Subscriber 这边则需要实现对事件的处理。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">class ScoreEventHandler extends Actor with Logging &#123;</span><br><span class="line">  override def receive = &#123;</span><br><span class="line">    // 订单支付成功</span><br><span class="line">    case XrEvent(XrEventType.ORDER_PAID, order: OrderResponse) =&gt;</span><br><span class="line">      // 处理订单支付成功事件</span><br><span class="line"></span><br><span class="line">    // 处理其他事件</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后我们通过调用 EventBus.subscribe 进行事件订阅。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">val eventBus = new XrEventBus</span><br><span class="line"></span><br><span class="line">// 积分事件处理模块</span><br><span class="line">val scoreEventHandler = XingrenSingletons.akkaSystem.actorOf(</span><br><span class="line">  Props[ScoreEventHandler], name = &quot;scoreEventHandler&quot;))</span><br><span class="line">eventBus.subscribe(scoreEventHandler, XrEventType.ORDER_PAID)</span><br><span class="line">// 订阅其他事件..</span><br><span class="line"></span><br><span class="line">// 微信服务号事件处理模块</span><br><span class="line">val weixinXrEventHandler = XingrenSingletons.akkaSystem.actorOf(</span><br><span class="line">  Props[WeixinXrMessageActor], name = &quot;weixinXrEventHandler&quot;))</span><br><span class="line">eventBus.subscribe(weixinXrEventHandler, XrEventType.ORDER_PAID)</span><br><span class="line">// 订阅其他事件..</span><br></pre></td></tr></table></figure>
+
+<p>最后，我们的订单处理模块只需要调用 EventBus.publish 发布订单支付事件就好了。至于那些需要处理该事件的模块，自然会去订阅这个事件。上面 XrEventBus 的实现里可以看到，发布其实就是用 Actor 的消息发送机制，将消息发布给了所有的 Subscriber。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">XrEventBus.publish(XrEventType.ORDER_PAID, new OrderResponse(order, product))</span><br></pre></td></tr></table></figure>
+
+<p>至此，我们的订单处理模块和积分处理模块、微信服务号模块就安全解耦了，很漂亮不是吗？</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>当然 Actor 还有其他很多应用场景。例如并发流式处理，甚至我们系统中的定时任务，也是通过 Actor 实现的。</p>
+<p>总之，Actor 为我们提供了更高层次的并发抽象模型，让我们不必关心底层的实现，只需着重实现业务逻辑。对于一些并发的场景，是很值得尝试的一种方案。</p>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://niuzaishu.top">xiao niu</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://niuzaishu.top/blogs/Actor%20%E6%A8%A1%E5%9E%8B%E5%8F%8A%20Akka%20%E7%AE%80%E4%BB%8B/">https://niuzaishu.top/blogs/Actor%20%E6%A8%A1%E5%9E%8B%E5%8F%8A%20Akka%20%E7%AE%80%E4%BB%8B/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        
+        <nav class="post-nav"><a class="prev" href="/blogs/%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">策略模式</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    <a class="next" href="/blogs/Java-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%8D%95%E4%BE%8B/">
+        <span class="next-text nav-default">Java 设计模式之单例</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:niuzaishu@gmail.com" class="iconfont icon-email" title="email"></a>
+        <a target="_blank" rel="noopener" href="https://github.com/niuzaishu" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2021<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">xiao niu</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="通过源码初探Scala Future"/><link rel="alternate" href="/default" title="小牛" ><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://niuzaishu.top/blogs/通过源码初探Scala-Future/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>通过源码初探Scala Future - 小牛</title>
+  <meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">小牛</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">小牛</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">通过源码初探Scala Future
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-5"><a class="toc-link" href="#java-%E7%9A%84%E7%B1%BB%E4%BC%BC%E5%AE%9E%E7%8E%B0"><span class="toc-text">java 的类似实现</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Scala-Future"><span class="toc-text">Scala Future</span></a></li></ol>
+    </div>
+  </div><div class="post-content"><p>一个Future可以认为代表了一次异步计算的操作。在Scala中可以很简单地使用Future进行异步处理。</p>
+<p>Future从字面意思可以理解为将来得到的结果，那么是怎样实现的呢？</p>
+<span id="more"></span>
+
+<h5 id="java-的类似实现"><a href="#java-的类似实现" class="headerlink" title="java 的类似实现"></a>java 的类似实现</h5><p>最直观的方式：创建一个新的线程，进行”Future”里面内容的处理。这样就不会阻塞原有的线程。</p>
+<p>在Java中简单地实现：</p>
+<ol>
+<li>继承Thread创建新的线程</li>
+<li>实现Runnable接口创建新的线程</li>
+<li>通过Callable创建FutureTask</li>
+</ol>
+<p>当然最合适的还是利用Executor框架，通过 ExecutorService，Callable,Future 这三个接口从线程池中创建带有返回结果的线程。</p>
+<p>具体代码这里就不列举了，不过可以想象即使代码回事怎样的臃肿。而Scala通过封装好的Future，将代码量大大降低。</p>
+<h5 id="Scala-Future"><a href="#Scala-Future" class="headerlink" title="Scala Future"></a>Scala Future</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Future&#123;...异步代码块...&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>简洁明了，代码量又低。在执行Future.apply{异步代码块}时，主线程将异步代码块交给新的线程，新起的线程负责异步代码块的计算，而主线程则解放出来，执行下一步。现在看一下它的apply 方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">def apply[T](body: =&gt;T)(implicit @deprecatedName(&#x27;execctx) executor: ExecutionContext): Future[T] = impl.Future(body)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>里面很重要的一点是必须要有隐式的ExecutionContext。这里的ExecutionContext 和 Java 的线程池的概念非常相似。都是执行具体 Task 的执行体。</p>
+<p>源码注释中也清楚地表明了这一点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">* APIs such as `Future.onComplete` require you to provide a callback</span><br><span class="line"> * and an implicit `ExecutionContext`. The implicit `ExecutionContext`</span><br><span class="line"> * will be used to execute the callback.</span><br></pre></td></tr></table></figure>
+<p>当Future完成时会自动回调onComplete 方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">/** When this future is completed, either through an exception, or a value,</span><br><span class="line">  *  apply the provided function.</span><br><span class="line">  *</span><br><span class="line">  *  If the future has already been completed,</span><br><span class="line">  *  this will either be applied immediately or be scheduled asynchronously.</span><br><span class="line">  *</span><br><span class="line">  */</span><br><span class="line"> def onComplete[U](@deprecatedName(&#x27;func) f: Try[T] =&gt; U)(implicit executor: ExecutionContext): Unit</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>具体一点调用，可以使用onSuccess或onFailure方法。但是它们都是基于onComplete的。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">def onSuccess[U](pf: PartialFunction[T, U])(implicit executor: ExecutionContext): Unit = onComplete &#123;</span><br><span class="line">    case Success(v) =&gt;</span><br><span class="line">      pf.applyOrElse[T, Any](v, Predef.conforms[T]) // Exploiting the cached function to avoid MatchError</span><br><span class="line">    case _ =&gt;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">def onFailure[U](@deprecatedName(&#x27;callback) pf: PartialFunction[Throwable, U])(implicit executor: ExecutionContext): Unit = onComplete &#123;</span><br><span class="line">    case Failure(t) =&gt;</span><br><span class="line">      pf.applyOrElse[Throwable, Any](t, Predef.conforms[Throwable]) // Exploiting the cached function to avoid MatchError</span><br><span class="line">    case _ =&gt;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>另外Furure中还提供了很多分装好的方法，以便于开发者使用。例如使用recover进行exception处理，使用fallbackTo实现某一个future异常后使用另一个future，andThen实现future序列，前面的future的结果会陆续作为后续future的输入等.</p>
+<p>下面以andThen 为例，分析一下其实现：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">def andThen[U](pf: PartialFunction[Try[T], U])(implicit executor: ExecutionContext): Future[T] = &#123;</span><br><span class="line">    val p = Promise[T]()</span><br><span class="line">    onComplete &#123;</span><br><span class="line">      case r =&gt; try pf.applyOrElse[Try[T], Any](r, Predef.conforms[Try[T]]) finally p complete r</span><br><span class="line">    &#125;</span><br><span class="line">    p.future</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>方法参数时一个偏函数，方法体内首先初始化了一个Promise。</p>
+<blockquote>
+<p>Future 表示一个可能还没有实际完成的异步任务的结果，针对这个结果可以添加 Callback 以便在任务执行成功或失败后做出对应的操作，而 Promise 交由任务执行者，任务执行者通过 Promise 可以标记任务完成或者失败。</p>
+</blockquote>
+<p><em>一个 Future 实例总是和一个（也只能是一个）Promise 实例关联在一起</em></p>
+<p>Promise 可以创建一个Future和完成一个Future(success complete和failed complete）,可以认为它可以控制异步操作的结果。</p>
+<p>通过 Promise 的 complete 方法标记已完成，然后通过.future方法在生成一个新的Future.</p>
+<p>下面内容摘自官方文档：</p>
+<blockquote>
+<p>经andThen返回的新Future无论原Future成功或失败都会返回与原Future一模一样的结果。一旦原Future完成并返回结果，andThen后跟的代码块就会被调用，且新Future将返回与原Future一样的结果，这确保了多个andThen调用的顺序执行。</p>
+</blockquote>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://niuzaishu.top">xiao niu</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://niuzaishu.top/blogs/%E9%80%9A%E8%BF%87%E6%BA%90%E7%A0%81%E5%88%9D%E6%8E%A2Scala-Future/">https://niuzaishu.top/blogs/%E9%80%9A%E8%BF%87%E6%BA%90%E7%A0%81%E5%88%9D%E6%8E%A2Scala-Future/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        
+        <nav class="post-nav"><a class="prev" href="/blogs/Java-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%8D%95%E4%BE%8B/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">Java 设计模式之单例</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    <a class="next" href="/blogs/Mock%E5%9F%BA%E7%A1%80%E4%B8%8E%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/">
+        <span class="next-text nav-default">Mock基础与简单使用</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:niuzaishu@gmail.com" class="iconfont icon-email" title="email"></a>
+        <a target="_blank" rel="noopener" href="https://github.com/niuzaishu" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2021<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">xiao niu</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>
