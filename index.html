@@ -82,6 +82,106 @@
         <div class="content-wrapper">
           <div id="content" class="content"><section id="posts" class="posts"><article class="post">
     <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/%E8%AE%B0%E4%B8%80%E6%AC%A1%20MySql%20%E6%95%B0%E6%8D%AE%E5%BA%93%E6%AD%BB%E9%94%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E8%BF%87%E7%A8%8B/">记一次 MySql 数据库死锁问题排查过程</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><h2 id="记一次-MySql-数据库死锁问题排查过程"><a href="#记一次-MySql-数据库死锁问题排查过程" class="headerlink" title="记一次 MySql 数据库死锁问题排查过程"></a>记一次 MySql 数据库死锁问题排查过程</h2><p>通过观察生产环境日志发现了一个数据库死锁问题。下面是问题排查过程的记录。</p>
+<p>项目使用的是 MySql 数据库，版本为 <code>5.7.24-log</code>，使用默认存储引擎 <code>InnoDB</code>，默认事务隔离级别：<code>Repeatable Read（可重复读）</code>，相关数据表如下：</p>
+          <div class="read-more">
+            <a href="/blogs/%E8%AE%B0%E4%B8%80%E6%AC%A1%20MySql%20%E6%95%B0%E6%8D%AE%E5%BA%93%E6%AD%BB%E9%94%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E8%BF%87%E7%A8%8B/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/%E4%BA%86%E8%A7%A3%E4%B8%80%E4%B8%8B%E7%AC%AC%E4%B8%89%E6%96%B9%E7%99%BB%E5%BD%95/">了解一下第三方登录</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><p>在我们的日常生活中，登录一个网站或 APP 时经常会选择微信、 QQ 或其他账号登录。这种情况我们就称为第三方登录。那么第三方登录的实现机制是什么呢？</p>
+          <div class="read-more">
+            <a href="/blogs/%E4%BA%86%E8%A7%A3%E4%B8%80%E4%B8%8B%E7%AC%AC%E4%B8%89%E6%96%B9%E7%99%BB%E5%BD%95/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/%E5%88%86%E5%B8%83%E5%BC%8F%20ID%20%E7%94%9F%E6%88%90%E7%AD%96%E7%95%A5/">分布式 ID 生成策略</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><h3 id="分布式-ID-生成策略"><a href="#分布式-ID-生成策略" class="headerlink" title="分布式 ID 生成策略"></a>分布式 ID 生成策略</h3><p>对于系统中的一组数据而言，必不可少地对应有唯一标识。简单的单体应用可以使用数据库的自增 ID 作为唯一标识。而在复杂的分布式系统中，就需要一些特定的策略去生成对应的分布式 ID。</p>
+<p>常见的项目中 ID 会有以下两个特点：</p>
+<ol>
+<li>全局唯一性。</li>
+<li>趋势递增（对于使用 MySQL 的项目而言）。<blockquote>
+<p>因为一般 ID 会作为数据库的主键存储，而在 MySQL InnoDB 中使用的是聚簇索引，使用有序的 ID 可以保证写入性能。</p>
+</blockquote>
+</li>
+</ol>
+<p>一般在分布式系统中，会有一个单独的服务来生成 ID。而这个服务则需要保证高可用性、高QPS 与安全性。另外生成的 ID 是不应该对外暴露的，如果非要对外展示，最好是无规则、不规律的编码。</p>
+<p>常见的生成策略如下：</p>
+          <div class="read-more">
+            <a href="/blogs/%E5%88%86%E5%B8%83%E5%BC%8F%20ID%20%E7%94%9F%E6%88%90%E7%AD%96%E7%95%A5/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/HashMap%20%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">HashMap 源码分析</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><h2 id="HashMap-源码分析"><a href="#HashMap-源码分析" class="headerlink" title="HashMap 源码分析"></a>HashMap 源码分析</h2><p><code>HashMap</code> 在我们日常开发中经常会用到，它使用的是数组加链表（JAVA8 链表超过一定长度，会改用红黑树）的数据结构实现的。本文会主要分析 JAVA8 版本下的 <code>put</code> 和 <code>resize</code> 方法的实现，梳理了一下 <code>HashMap</code> 插入和扩容的流程。</p>
+          <div class="read-more">
+            <a href="/blogs/HashMap%20%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7%20Maven%20(%E4%BA%8C)%20/"></a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><hr>
+<h2 id="title-项目管理工具—Maven-二"><a href="#title-项目管理工具—Maven-二" class="headerlink" title="title: 项目管理工具—Maven (二) "></a>title: 项目管理工具—Maven (二) </h2><h3 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h3><p>Maven 中定有三个标准的生命周期（Build Lifecycle）：</p>
+<ul>
+<li>clean</li>
+<li>default</li>
+<li>site</li>
+</ul>
+<p>每个生命周期又可以细分成不同的阶段（Phase）。每一个 phase 都对应 1 个或多个目标（ goal）, goal 是存在于 maven plugin 中.</p>
+<p>执行 Maven 的主要方式就是调用 Maven 生命周期阶段。而 Maven 生命周期的每一个阶段的具体实现都是由 Maven 插件实现的。</p>
+          <div class="read-more">
+            <a href="/blogs/%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7%20Maven%20(%E4%BA%8C)%20/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7%20Maven%20(%E4%B8%80)/">项目管理工具—Maven (一)</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>简单来说：Maven 是一个软件项目管理和自动构建工具。</p>
+<blockquote>
+<p>Maven是一个项目管理工具，它包含了一个项目对象模型 (Project Object Model)，一组标准集合，一个项目生命周期(Project Lifecycle)，一个依赖管理系统(Dependency Management System)，和用来运行定义在生命周期阶段(phase)中插件(plugin)目标(goal)的逻辑。</p>
+</blockquote>
+          <div class="read-more">
+            <a href="/blogs/%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7%20Maven%20(%E4%B8%80)/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
       <h1 class="post-title"><a class="post-link" href="/blogs/Java%E8%AF%8A%E6%96%AD%E5%88%A9%E5%99%A8%20Arthas/">Java诊断利器 Arthas</a>
         </h1>
 
@@ -148,108 +248,6 @@
 <p>线程上下文切换的时机：当前线程的CPU<strong>时间片使用完处于就绪状态时</strong>，当前<strong>线程被其他线程中断</strong>时</p>
           <div class="read-more">
             <a href="/blogs/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80%EF%BC%88%E4%BA%8C%EF%BC%89/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/blogs/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80%EF%BC%88%E4%B8%80%EF%BC%89/">线程基础（一）</a>
-        </h1>
-
-      <div class="post-meta"></div>
-    </header>
-
-    <div class="post-content"><p>[TOC]</p>
-<h4 id="1-什么是线程"><a href="#1-什么是线程" class="headerlink" title="1. 什么是线程"></a>1. 什么是线程</h4><p>线程本身不会独立存在，它是进程中的一个实体。</p>
-<blockquote>
-<p>进程：是系统进行资源分配和调度的基本单位，是代码在数据集合上的一次运行活动。</p>
-<p>线程：是进程的一个执行路径，是CPU 分配的基本单位。一个进程中至少有一个线程，多个线程共享进程的资源</p>
-</blockquote>
-<p>例;在Java中启动main 函数时，其实是启用了一个JVM 进程，而main函数所在的线程就是这个这个进程中的一个线程，也称主线程、</p>
-<p>多个线程共享进程的堆和方法区资源，但是各个线程有自己的程序计数器和栈区域。</p>
-          <div class="read-more">
-            <a href="/blogs/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80%EF%BC%88%E4%B8%80%EF%BC%89/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/blogs/CQRS%20%E4%B8%8E%20Event%20Sourcing/">CQRS 与 Event Sourcing</a>
-        </h1>
-
-      <div class="post-meta"></div>
-    </header>
-
-    <div class="post-content"><p>CQRS (Command Query Responsibility Segregation), 命令查询职责分离。CQRS 是一种简单的模式。它将对象的操作分为命令与查询。查询返回数据，不会更改对象的状态。命令更改对象的状态，但不返回任何的数据。</p>
-<p>Event Sourcing (ES, 事件回溯)， 按照 Event Sourcing 的思想， 应用不保存对象的最新状态，而是保存对象产生的所有事件，并且通过事件溯源得到对象的最新状态。</p>
-          <div class="read-more">
-            <a href="/blogs/CQRS%20%E4%B8%8E%20Event%20Sourcing/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/blogs/Java%20ServiceLoader/">Java ServiceLoader</a>
-        </h1>
-
-      <div class="post-meta"></div>
-    </header>
-
-    <div class="post-content"><h2 id="Java-ServiceLoader"><a href="#Java-ServiceLoader" class="headerlink" title="Java ServiceLoader"></a>Java ServiceLoader</h2><p><code>ServiceLoader</code> 在 <code>JDK</code> 源码中的注释如下：</p>
-<blockquote>
-<p>一个简单的服务提供者加载设施。服务 是一个熟知的接口和类（通常为抽象类）集合。服务提供者 是服务的特定实现。提供者中的类通常实现接口，并子类化在服务本身中定义的子类。服务提供者可以以扩展的形式安装在 Java 平台的实现中，也就是将 jar 文件放入任意常用的扩展目录中。也可通过将提供者加入应用程序类路径，或者通过其他某些特定于平台的方式使其可用。</p>
-</blockquote>
-<p>简单来说就是用来加载服务实现类的。首先我们可以先了解一下<code> Java SPI</code>。</p>
-<p>SPI (Service Provider Interface)，是<code>JDK</code>内置的一种服务发现机制，很多框架用它来做服务的扩展发现。</p>
-          <div class="read-more">
-            <a href="/blogs/Java%20ServiceLoader/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/blogs/%E5%BE%B7%E9%9B%B7%E7%A6%8F%E6%96%AF%E6%8A%80%E8%83%BD%E8%8E%B7%E5%8F%96%E6%A8%A1%E5%9E%8B/">德雷福斯技能获取模型</a>
-        </h1>
-
-      <div class="post-meta"></div>
-    </header>
-
-    <div class="post-content"><h2 id="德雷福斯技能获取模型"><a href="#德雷福斯技能获取模型" class="headerlink" title="德雷福斯技能获取模型"></a>德雷福斯技能获取模型</h2><p>德雷福斯模型是一种衡量人们工作方法和能力,反省并提高专业技能的层级模型。</p>
-<p>20世纪70年代德雷福斯兄弟想要推动人工智能的技术发展水平，准备编写一个能够像人类一样学习和获取技能的软件（或者证明这根本不可行）。为了实现这个目标，他们通过研究人类是学习历程。提出了德雷福斯技能获取模型，概括了从新手到专家必须经历的5个阶段。并且这个模型已经被证实是行之有效的</p>
-          <div class="read-more">
-            <a href="/blogs/%E5%BE%B7%E9%9B%B7%E7%A6%8F%E6%96%AF%E6%8A%80%E8%83%BD%E8%8E%B7%E5%8F%96%E6%A8%A1%E5%9E%8B/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/blogs/%E5%8A%A0%E5%AF%86%E3%80%81%E7%AD%BE%E5%90%8D%E4%B8%8ETOKEN/">加密、签名与TOKEN</a>
-        </h1>
-
-      <div class="post-meta"></div>
-    </header>
-
-    <div class="post-content"><h2 id="加密、签名与TOKEN"><a href="#加密、签名与TOKEN" class="headerlink" title="加密、签名与TOKEN"></a>加密、签名与TOKEN</h2><p>在 api 接口的开发中，经常会遇到下面三个名词：加密、签名、Token。下面会对其进行介绍。</p>
-<h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>首先可以把他们分成两个层面：</p>
-<ul>
-<li>Token: 用来保持状态</li>
-<li>加密、签名：用来保证接口安全</li>
-</ul>
-          <div class="read-more">
-            <a href="/blogs/%E5%8A%A0%E5%AF%86%E3%80%81%E7%AD%BE%E5%90%8D%E4%B8%8ETOKEN/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/blogs/%E4%BB%8E%20ThreadLocal%20%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%9C%8B%E6%95%A3%E5%88%97%E7%AE%97%E6%B3%95/">从 ThreadLocal 的实现看散列算法</a>
-        </h1>
-
-      <div class="post-meta"></div>
-    </header>
-
-    <div class="post-content"><h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>最近在看 JDK 的 <code>ThreadLocal</code> 源码时，发现了一段有意思的代码，如下所示。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> threadLocalHashCode = nextHashCode();</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">   * The difference between successively generated hash codes - turns</span></span><br><span class="line"><span class="comment">   * implicit sequential thread-local IDs into near-optimally spread</span></span><br><span class="line"><span class="comment">   * multiplicative hash values for power-of-two-sized tables.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> HASH_INCREMENT = <span class="number">0x61c88647</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Returns the next hash code.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">nextHashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> nextHashCode.getAndAdd(HASH_INCREMENT);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>可以看到，其中定义了一个魔法值 <code>HASH_INCREMENT = 0x61c88647</code>, 对于实例变量 <code>threadLocalHashCode</code>, 每当创建 <code>ThreadLocal</code> 实例时这个值都会 <code>getAndAdd(0x61c88647)</code>。</p>
-<p><code>0x61c88647</code> 转化成二进制即为 <code>1640531527</code>，它常用于在散列中增加哈希值。上面的代码注释中也解释到：<code>HASH_INCREMENT</code> 是为了让哈希码能均匀的分布在2的N次方的数组里。</p>
-<p>那么 <code>0x61c88647</code> 是怎么起作用的呢？</p>
-          <div class="read-more">
-            <a href="/blogs/%E4%BB%8E%20ThreadLocal%20%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%9C%8B%E6%95%A3%E5%88%97%E7%AE%97%E6%B3%95/" class="read-more-link">阅读更多</a>
           </div>
         </div></article>
       <nav class="pagination"><a class="next" href="/page/2/">

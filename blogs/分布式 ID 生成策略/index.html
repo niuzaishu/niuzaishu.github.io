@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="分布式 ID 生成策略"/><link rel="alternate" href="/default" title="小牛" ><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://niuzaishu.top/blogs/分布式 ID 生成策略/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>分布式 ID 生成策略 - 小牛</title>
+  <meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">小牛</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a><a href="/archives/">
+        <li class="mobile-menu-item">归档
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">小牛</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            归档
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">分布式 ID 生成策略
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F-ID-%E7%94%9F%E6%88%90%E7%AD%96%E7%95%A5"><span class="toc-text">分布式 ID 生成策略</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#UUID"><span class="toc-text">UUID</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-text">优点：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-text">缺点：</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Snowflake"><span class="toc-text">Snowflake</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BC%98%E7%82%B9"><span class="toc-text">优点</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9"><span class="toc-text">缺点</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Flicker"><span class="toc-text">Flicker</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BC%98%E7%82%B9-1"><span class="toc-text">优点</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9-1"><span class="toc-text">缺点</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Redis"><span class="toc-text">Redis</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BC%98%E7%82%B9%EF%BC%9A-1"><span class="toc-text">优点：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9%EF%BC%9A-1"><span class="toc-text">缺点：</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Leaf"><span class="toc-text">Leaf</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Leaf-segment-%E6%95%B0%E6%8D%AE%E5%BA%93%E6%96%B9%E6%A1%88"><span class="toc-text">Leaf-segment 数据库方案</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Leaf-snowflake-%E6%96%B9%E6%A1%88"><span class="toc-text">Leaf-snowflake 方案</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></li></ol>
+    </div>
+  </div><div class="post-content"><h3 id="分布式-ID-生成策略"><a href="#分布式-ID-生成策略" class="headerlink" title="分布式 ID 生成策略"></a>分布式 ID 生成策略</h3><p>对于系统中的一组数据而言，必不可少地对应有唯一标识。简单的单体应用可以使用数据库的自增 ID 作为唯一标识。而在复杂的分布式系统中，就需要一些特定的策略去生成对应的分布式 ID。</p>
+<p>常见的项目中 ID 会有以下两个特点：</p>
+<ol>
+<li>全局唯一性。</li>
+<li>趋势递增（对于使用 MySQL 的项目而言）。<blockquote>
+<p>因为一般 ID 会作为数据库的主键存储，而在 MySQL InnoDB 中使用的是聚簇索引，使用有序的 ID 可以保证写入性能。</p>
+</blockquote>
+</li>
+</ol>
+<p>一般在分布式系统中，会有一个单独的服务来生成 ID。而这个服务则需要保证高可用性、高QPS 与安全性。另外生成的 ID 是不应该对外暴露的，如果非要对外展示，最好是无规则、不规律的编码。</p>
+<p>常见的生成策略如下：</p>
+<span id="more"></span>
+
+<h4 id="UUID"><a href="#UUID" class="headerlink" title="UUID"></a>UUID</h4><p>UUID (Universally Unique Identifier)  生成的是一个长度为 32 的 16 进制格式的字符串。UUID 有多个版本，各版本算法不同。但核心思想是一致的，基本上都是结合机器的网卡、当前时间、一个随机数来生成特定长度的字符串。</p>
+<h5 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h5><p>性能好、高可扩展性：本地生成，无网络消耗，不需要考虑性能瓶颈。</p>
+<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>无法保证趋势递增。</li>
+<li>UUID 过长，如果需要在数据库存储，作为主键建立索引效率低。</li>
+</ul>
+<p>适用场景：不需要考虑空间占用，不需要生成有递增趋势，且不在 MySQL 中存储。</p>
+<h4 id="Snowflake"><a href="#Snowflake" class="headerlink" title="Snowflake"></a>Snowflake</h4><p>snowflake 是 Twitter 开源的一个 ID 生成算法。</p>
+<p> <img src="https://niuzaishu.oss-cn-shanghai.aliyuncs.com/img/blog/snowflake-64bit.jpg" alt="img"></p>
+<ul>
+<li>首位符号位：因为 ID 一般为正数，该值为 0。</li>
+<li>41 位时间戳（毫秒级）：<blockquote>
+<p>时间戳不是当前时间的时间戳，而是存储时间戳的差值（当前时间戳 - 起始时间戳（起始时间戳需要程序指定））理论上可以最多使用 <code>(1 &lt;&lt; 41) / (1000x60x60x24x365) = 69年</code>。</p>
+</blockquote>
+</li>
+<li>10 位数据机器位：包括 5 位数据标识位和 5 位机器标识位，也就是说最多可以部署节点数为：<code>1 &lt;&lt; 10 = 1024</code>。</li>
+<li>12 位毫秒内的序列：同一节点、同一时刻最多生成 ID 数 <code>1 &lt;&lt; 12 = 4096</code>。</li>
+</ul>
+<p>最后生成结果为 64 位 Long 型数值。</p>
+<h5 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h5><ul>
+<li>趋势递增，且按照时间有序。</li>
+<li>性能高、稳定性高、不依赖数据库等第三方系统。</li>
+<li>可以按照自身业务特性灵活分配 bit 位。</li>
+</ul>
+<h5 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h5><ul>
+<li>依赖于机器时钟，时钟回拨会造成暂不可用或重复发号。</li>
+</ul>
+<blockquote>
+<p>在分布式系统中，每台机器上的时钟不可能完全同步。在同步各个服务器的时间时，有一定几率发生时钟回拨。</p>
+</blockquote>
+<p>适用场景：要求高性能，可以不连续，数据类型为 long 型。</p>
+<h4 id="Flicker"><a href="#Flicker" class="headerlink" title="Flicker"></a>Flicker</h4><p>Flicker 方案主要思路是设计单独的库表，利用数据库的自增 ID 来生成全局 ID。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE ticket_center (  </span><br><span class="line">    id bigint(20) unsigned NOT NULL auto_increment,  </span><br><span class="line">    stub char(1) NOT NULL default &#x27;&#x27;,  </span><br><span class="line">    PRIMARY KEY (id),  </span><br><span class="line">    UNIQUE KEY unq_stub (stub)  </span><br><span class="line">)ENGINE=MyISAM;  </span><br></pre></td></tr></table></figure>
+<ul>
+<li><blockquote>
+<p>stub: 票根，对应需要生成 Id 的业务方编码，可以是项目名、表名甚至是服务器 IP 地址。</p>
+</blockquote>
+</li>
+<li><blockquote>
+<p>MyISAM：默认表类型，基于传统的 ISAM 类型。ISAM是 Indexed Sequential Access Method (有索引的顺序访问方法) 的缩写，它是存储记录和文件的标准方法。不是事务安全的，而且不支持外键。如果执行大量的 select，MySql 存储引擎选用 MyISAM 比较适合。</p>
+</blockquote>
+</li>
+</ul>
+<p>可以使用下面的SQL 获取 ID:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">REPLACE INTO ticket_center (stub) VALUES (&#x27;test&#x27;);  </span><br><span class="line">SELECT LAST_INSERT_ID();  </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>Replace into</code> 先尝试插入数据到表中，如果发现表中已经有此行数据（根据主键或者唯一索引判断）则先删除此行数据，然后插入新的数据， 否则直接插入新数据</p>
+</blockquote>
+<p>为了解决单点故障问题：Flicker 方案启用了两台数据库服务器来生成 ID，通过区分 auto_increment 的起始值和步长来生成奇偶数的 ID。（也可以根据情况部署多台服务器）</p>
+<h5 id="优点-1"><a href="#优点-1" class="headerlink" title="优点"></a>优点</h5><ul>
+<li>充分利用了数据库自增 ID 机制，生成的 ID 有序递增。</li>
+</ul>
+<h5 id="缺点-1"><a href="#缺点-1" class="headerlink" title="缺点"></a>缺点</h5><ul>
+<li>依赖于数据库，可用性低</li>
+<li>水平扩展困难：定义好了起始值、步长和机器台数之后，如果要添加机器就比较麻烦了。</li>
+</ul>
+<p>适用场景：数据量不多，并发量不大。</p>
+<h4 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h4><p>因为 Redis 中的所有命令都是单线程的，可以利用 <code>Incrby</code>命令来模拟 ID 的递增。并且可以通过使用集群来提升吞吐量。我们可以为不同的 Redis 节点设置不同的初始值并统一步长，这样就能利用 Redis 生成唯一且趋势递增的 ID 了。例如有 3 个 Redis 节点，分别设置初始值为 1、2、3 ，这时步长就应该定为 3 。这样每个节点不会生成重复的 ID。</p>
+<blockquote>
+<p>Incrby ：将 key 中储存的数字加上指定的增量值。这是一个 “INCR AND GET” 的原子操作,  业务方可以定义一个自己的 key 值，通过 INCR 命令来获取对应的 ID。</p>
+</blockquote>
+<h5 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>不依赖数据库，且性能优于依赖数据库的 Flicker 方案。</li>
+</ul>
+<h5 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>扩展性低，Redis 集群需要设置好初始值与步长。</li>
+<li>Reids 宕机可能会生成重复的Id。</li>
+</ul>
+<p>适用场景：Redis 集群高可用，并发量高。</p>
+<h4 id="Leaf"><a href="#Leaf" class="headerlink" title="Leaf"></a>Leaf</h4><p>上面提到的这些常见的 ID 生成策略，有时并不能完全满足实际生产中的需求，在实际项目中会对其做一些改造和优化。</p>
+<p>美团的 Leaf 分布式 ID 生成系统 ，在 Flicker 策略 与 Snowflake 算法的基础上做了两套优化的方案。下文会简单介绍一下 Leaf 方案做的一些优化，并不会深入分析。详细方案大家可以查看这里：《<a target="_blank" rel="noopener" href="https://tech.meituan.com/2017/04/21/mt-leaf.html">Leaf 分布式 ID 生成系统 </a> 》</p>
+<h5 id="Leaf-segment-数据库方案"><a href="#Leaf-segment-数据库方案" class="headerlink" title="Leaf-segment 数据库方案"></a>Leaf-segment 数据库方案</h5><p>相比于 Flicker 方案每次都需要读取数据库，Leaf-segment 改为了利用 proxy server 批量获取，且做了双 buffer 的优化。设计图如下：</p>
+<p><img src="https://niuzaishu.oss-cn-shanghai.aliyuncs.com/img/blog/f2625fac.png" alt="img"></p>
+<blockquote>
+<p>双 buffer：ID 分号段加载，且当号段消费到某个点时就异步的把下一个号段加载到内存中。而不需要等到号段用尽的时候才去更新号段。</p>
+</blockquote>
+<h5 id="Leaf-snowflake-方案"><a href="#Leaf-snowflake-方案" class="headerlink" title="Leaf-snowflake 方案"></a>Leaf-snowflake 方案</h5><p>主要是针对时钟回拨问题做了特殊处理。 若发生时钟回拨则拒绝发号，并进行告警。 </p>
+<p><img src="https://niuzaishu.oss-cn-shanghai.aliyuncs.com/img/blog/1453b4e9.png" alt="img"></p>
+<p>适用场景：服务规模较大，调用频繁。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>关于分布式 ID 的生成策略暂且介绍到这里。其实还有一些优秀的解决方案，比如百度的 uid-generator，微信的 SEQSVR。基本上都是都上面一些方案的优化，这里就不做详细介绍了。在实际使用中，需要根据自身业务场景来选取合适的方案，也并非大而全的方案就是好的方案。</p>
+<p>参考文章：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://tech.meituan.com/2017/04/21/mt-leaf.html">Leaf——美团点评分布式ID生成系统</a></li>
+<li><a target="_blank" rel="noopener" href="https://gitbook.cn/books/5b1fd01c3b0724667ce2179a/index.html">电商高并发、高流量下分布式 ID 的解决方案</a></li>
+</ul>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://niuzaishu.top">xiao niu</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://niuzaishu.top/blogs/%E5%88%86%E5%B8%83%E5%BC%8F%20ID%20%E7%94%9F%E6%88%90%E7%AD%96%E7%95%A5/">https://niuzaishu.top/blogs/%E5%88%86%E5%B8%83%E5%BC%8F%20ID%20%E7%94%9F%E6%88%90%E7%AD%96%E7%95%A5/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        
+        <nav class="post-nav"><a class="prev" href="/blogs/%E4%BA%86%E8%A7%A3%E4%B8%80%E4%B8%8B%E7%AC%AC%E4%B8%89%E6%96%B9%E7%99%BB%E5%BD%95/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">了解一下第三方登录</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    <a class="next" href="/blogs/HashMap%20%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+        <span class="next-text nav-default">HashMap 源码分析</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:niuzaishu@gmail.com" class="iconfont icon-email" title="email"></a>
+        <a target="_blank" rel="noopener" href="https://github.com/niuzaishu" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2021<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">xiao niu</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>

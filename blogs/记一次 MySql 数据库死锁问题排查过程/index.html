@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="记一次 MySql 数据库死锁问题排查过程"/><link rel="alternate" href="/default" title="小牛" ><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://niuzaishu.top/blogs/记一次 MySql 数据库死锁问题排查过程/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>记一次 MySql 数据库死锁问题排查过程 - 小牛</title>
+  <meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">小牛</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a><a href="/archives/">
+        <li class="mobile-menu-item">归档
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">小牛</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            归档
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">记一次 MySql 数据库死锁问题排查过程
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%B0%E4%B8%80%E6%AC%A1-MySql-%E6%95%B0%E6%8D%AE%E5%BA%93%E6%AD%BB%E9%94%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E8%BF%87%E7%A8%8B"><span class="toc-text">记一次 MySql 数据库死锁问题排查过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AD%BB%E9%94%81%E6%97%A5%E5%BF%97"><span class="toc-text">死锁日志</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90"><span class="toc-text">日志分析</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%A7%84%E5%88%99"><span class="toc-text">规则</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%94%81%E6%9C%BA%E5%88%B6"><span class="toc-text">锁机制</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%94%81%E6%A8%A1%E5%BC%8F"><span class="toc-text">锁模式</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%94%81%E7%B1%BB%E5%9E%8B"><span class="toc-text">锁类型</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E8%AE%B0%E5%BD%95%E9%94%81%EF%BC%88Record-Lock%EF%BC%89"><span class="toc-text">记录锁（Record Lock）</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E9%97%B4%E9%9A%99%E9%94%81%EF%BC%88Gap-Lock%EF%BC%89"><span class="toc-text">间隙锁（Gap Lock）</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#Next-Key-%E9%94%81%EF%BC%88Next-Key-Locks%EF%BC%89"><span class="toc-text">Next-Key 锁（Next-Key Locks）</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E6%8F%92%E5%85%A5%E6%84%8F%E5%90%91%E9%94%81%EF%BC%88Insert-Intention-Locks%EF%BC%89"><span class="toc-text">插入意向锁（Insert Intention Locks）</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E6%8B%9F%E5%B9%B6%E5%8F%91"><span class="toc-text">模拟并发</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </div><div class="post-content"><h2 id="记一次-MySql-数据库死锁问题排查过程"><a href="#记一次-MySql-数据库死锁问题排查过程" class="headerlink" title="记一次 MySql 数据库死锁问题排查过程"></a>记一次 MySql 数据库死锁问题排查过程</h2><p>通过观察生产环境日志发现了一个数据库死锁问题。下面是问题排查过程的记录。</p>
+<p>项目使用的是 MySql 数据库，版本为 <code>5.7.24-log</code>，使用默认存储引擎 <code>InnoDB</code>，默认事务隔离级别：<code>Repeatable Read（可重复读）</code>，相关数据表如下：</p>
+<span id="more"></span>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `bookingproperty` (</span><br><span class="line">  `id` <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  `bookingId` <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;预约Id&#x27;</span>,</span><br><span class="line">  `bookingType` tinyint(<span class="number">4</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;预约类型&#x27;</span>,</span><br><span class="line">  `type` tinyint(<span class="number">4</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;属性类型&#x27;</span>,</span><br><span class="line">  `name` <span class="type">varchar</span>(<span class="number">50</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">&#x27;&#x27;</span> COMMENT <span class="string">&#x27;属性名&#x27;</span>,</span><br><span class="line">  `<span class="keyword">value</span>` <span class="type">varchar</span>(<span class="number">500</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">&#x27;&#x27;</span> COMMENT <span class="string">&#x27;属性值&#x27;</span>,</span><br><span class="line">  `created` <span class="type">timestamp</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span>,</span><br><span class="line">  `updated` <span class="type">timestamp</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span> <span class="keyword">ON</span> UPDATE <span class="built_in">CURRENT_TIMESTAMP</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`),</span><br><span class="line">  <span class="keyword">UNIQUE</span> KEY `unqBookingIdTypeName` (`bookingId`,`bookingType`,`name`)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB AUTO_INCREMENT<span class="operator">=</span><span class="number">615</span> <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8mb4 COMMENT<span class="operator">=</span><span class="string">&#x27;预约属性&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="死锁日志"><a href="#死锁日志" class="headerlink" title="死锁日志"></a>死锁日志</h4><h5 id="日志分析"><a href="#日志分析" class="headerlink" title="日志分析"></a>日志分析</h5><p>通过下面的语句查看死锁日志：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> engine innodb status;</span><br></pre></td></tr></table></figure>
+
+<p>日志如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">------------------------</span></span><br><span class="line">LATEST DETECTED DEADLOCK</span><br><span class="line"><span class="comment">------------------------</span></span><br><span class="line"><span class="number">2019</span><span class="number">-12</span><span class="number">-29</span> <span class="number">16</span>:<span class="number">20</span>:<span class="number">38</span> <span class="number">0x700002de5000</span></span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> (<span class="number">1</span>) TRANSACTION:</span><br><span class="line">TRANSACTION <span class="number">208825</span>, ACTIVE <span class="number">0</span> sec inserting</span><br><span class="line">mysql tables <span class="keyword">in</span> use <span class="number">1</span>, locked <span class="number">1</span></span><br><span class="line">LOCK WAIT <span class="number">3</span> lock struct(s), heap size <span class="number">1136</span>, <span class="number">2</span> <span class="type">row</span> lock(s), undo log entries <span class="number">1</span></span><br><span class="line">MySQL thread id <span class="number">947</span>, OS thread handle <span class="number">123145350713344</span>, query id <span class="number">40607</span> localhost <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span> root update</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> `clinic`.`bookingproperty` (`bookingId`, `bookingType`, `type`, `name`, `<span class="keyword">value</span>`) <span class="keyword">values</span> (<span class="number">99</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="string">&#x27;INSERT_TEST&#x27;</span>, <span class="string">&#x27;0&#x27;</span>) <span class="keyword">on</span> duplicate key update `clinic`.`bookingproperty`.`bookingId` <span class="operator">=</span> <span class="number">99</span>, `clinic`.`bookingproperty`.`bookingType` <span class="operator">=</span> <span class="number">0</span>, `clinic`.`bookingproperty`.`type` <span class="operator">=</span> <span class="number">0</span>, `clinic`.`bookingproperty`.`name` <span class="operator">=</span> <span class="string">&#x27;INSERT_TEST&#x27;</span>, `clinic`.`bookingproperty`.`<span class="keyword">value</span>` <span class="operator">=</span> <span class="string">&#x27;0&#x27;</span></span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> (<span class="number">1</span>) WAITING <span class="keyword">FOR</span> THIS LOCK <span class="keyword">TO</span> BE GRANTED:</span><br><span class="line">RECORD LOCKS space id <span class="number">1196</span> page <span class="keyword">no</span> <span class="number">4</span> n bits <span class="number">624</span> index unqBookingIdTypeName <span class="keyword">of</span> <span class="keyword">table</span> `clinic`.`bookingproperty` trx id <span class="number">208825</span> lock_mode X locks gap before rec <span class="keyword">insert</span> intention waiting</span><br><span class="line">Record lock, heap <span class="keyword">no</span> <span class="number">156</span> PHYSICAL RECORD: n_fields <span class="number">4</span>; compact format; info bits <span class="number">0</span></span><br><span class="line"> <span class="number">0</span>: len <span class="number">4</span>; hex <span class="number">800000</span>ca; <span class="keyword">asc</span>     ;;</span><br><span class="line"> <span class="number">1</span>: len <span class="number">1</span>; hex <span class="number">82</span>; <span class="keyword">asc</span>  ;;</span><br><span class="line"> <span class="number">2</span>: len <span class="number">21</span>; hex <span class="number">564552494649434154494</span>f4e5f53484545545f4944; <span class="keyword">asc</span> VERIFICATION_SHEET_ID;;</span><br><span class="line"> <span class="number">3</span>: len <span class="number">4</span>; hex <span class="number">80000032</span>; <span class="keyword">asc</span>    <span class="number">2</span>;;</span><br><span class="line"></span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> (<span class="number">2</span>) TRANSACTION:</span><br><span class="line">TRANSACTION <span class="number">208824</span>, ACTIVE <span class="number">0</span> sec inserting</span><br><span class="line">mysql tables <span class="keyword">in</span> use <span class="number">1</span>, locked <span class="number">1</span></span><br><span class="line"><span class="number">5</span> lock struct(s), heap size <span class="number">1136</span>, <span class="number">4</span> <span class="type">row</span> lock(s), undo log entries <span class="number">1</span></span><br><span class="line">MySQL thread id <span class="number">946</span>, OS thread handle <span class="number">123145350434816</span>, query id <span class="number">40601</span> localhost <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span> root update</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> `clinic`.`bookingproperty` (`bookingId`, `bookingType`, `type`, `name`, `<span class="keyword">value</span>`) <span class="keyword">values</span> (<span class="number">98</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="string">&#x27;INSERT_TEST&#x27;</span>, <span class="string">&#x27;0&#x27;</span>) <span class="keyword">on</span> duplicate key update `clinic`.`bookingproperty`.`bookingId` <span class="operator">=</span> <span class="number">98</span>, `clinic`.`bookingproperty`.`bookingType` <span class="operator">=</span> <span class="number">0</span>, `clinic`.`bookingproperty`.`type` <span class="operator">=</span> <span class="number">0</span>, `clinic`.`bookingproperty`.`name` <span class="operator">=</span> <span class="string">&#x27;INSERT_TEST&#x27;</span>, `clinic`.`bookingproperty`.`<span class="keyword">value</span>` <span class="operator">=</span> <span class="string">&#x27;0&#x27;</span></span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> (<span class="number">2</span>) HOLDS THE LOCK(S):</span><br><span class="line">RECORD LOCKS space id <span class="number">1196</span> page <span class="keyword">no</span> <span class="number">4</span> n bits <span class="number">624</span> index unqBookingIdTypeName <span class="keyword">of</span> <span class="keyword">table</span> `clinic`.`bookingproperty` trx id <span class="number">208824</span> lock_mode X locks gap before rec</span><br><span class="line">Record lock, heap <span class="keyword">no</span> <span class="number">156</span> PHYSICAL RECORD: n_fields <span class="number">4</span>; compact format; info bits <span class="number">0</span></span><br><span class="line"> <span class="number">0</span>: len <span class="number">4</span>; hex <span class="number">800000</span>ca; <span class="keyword">asc</span>     ;;</span><br><span class="line"> <span class="number">1</span>: len <span class="number">1</span>; hex <span class="number">82</span>; <span class="keyword">asc</span>  ;;</span><br><span class="line"> <span class="number">2</span>: len <span class="number">21</span>; hex <span class="number">564552494649434154494</span>f4e5f53484545545f4944; <span class="keyword">asc</span> VERIFICATION_SHEET_ID;;</span><br><span class="line"> <span class="number">3</span>: len <span class="number">4</span>; hex <span class="number">80000032</span>; <span class="keyword">asc</span>    <span class="number">2</span>;;</span><br><span class="line"></span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> (<span class="number">2</span>) WAITING <span class="keyword">FOR</span> THIS LOCK <span class="keyword">TO</span> BE GRANTED:</span><br><span class="line">RECORD LOCKS space id <span class="number">1196</span> page <span class="keyword">no</span> <span class="number">4</span> n bits <span class="number">624</span> index unqBookingIdTypeName <span class="keyword">of</span> <span class="keyword">table</span> `clinic`.`bookingproperty` trx id <span class="number">208824</span> lock_mode X locks gap before rec <span class="keyword">insert</span> intention waiting</span><br><span class="line">Record lock, heap <span class="keyword">no</span> <span class="number">156</span> PHYSICAL RECORD: n_fields <span class="number">4</span>; compact format; info bits <span class="number">0</span></span><br><span class="line"> <span class="number">0</span>: len <span class="number">4</span>; hex <span class="number">800000</span>ca; <span class="keyword">asc</span>     ;;</span><br><span class="line"> <span class="number">1</span>: len <span class="number">1</span>; hex <span class="number">82</span>; <span class="keyword">asc</span>  ;;</span><br><span class="line"> <span class="number">2</span>: len <span class="number">21</span>; hex <span class="number">564552494649434154494</span>f4e5f53484545545f4944; <span class="keyword">asc</span> VERIFICATION_SHEET_ID;;</span><br><span class="line"> <span class="number">3</span>: len <span class="number">4</span>; hex <span class="number">80000032</span>; <span class="keyword">asc</span>    <span class="number">2</span>;;</span><br><span class="line"></span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> WE ROLL BACK TRANSACTION (<span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>通过死锁日志获取信息如下：</p>
+<ol>
+<li>通过 <code>(1) TRANSACTION:</code> 中内容得知事务 1 的语句为：</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> `clinic`.`bookingproperty` (`bookingId`, `bookingType`, `type`, `name`, `<span class="keyword">value</span>`) <span class="keyword">values</span> (<span class="number">99</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="string">&#x27;INSERT_TEST&#x27;</span>, <span class="string">&#x27;0&#x27;</span>) <span class="keyword">on</span> duplicate key update `clinic`.`bookingproperty`.`bookingId` <span class="operator">=</span> <span class="number">99</span>, `clinic`.`bookingproperty`.`bookingType` <span class="operator">=</span> <span class="number">0</span>, `clinic`.`bookingproperty`.`type` <span class="operator">=</span> <span class="number">0</span>, `clinic`.`bookingproperty`.`name` <span class="operator">=</span> <span class="string">&#x27;INSERT_TEST&#x27;</span>, `clinic`.`bookingproperty`.`<span class="keyword">value</span>` <span class="operator">=</span> <span class="string">&#x27;0&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>通过 <code>(2) TRANSACTION</code> 中信息得知事务 2 的语句为：</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> `clinic`.`bookingproperty` (`bookingId`, `bookingType`, `type`, `name`, `<span class="keyword">value</span>`) <span class="keyword">values</span> (<span class="number">98</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="string">&#x27;INSERT_TEST&#x27;</span>, <span class="string">&#x27;0&#x27;</span>) <span class="keyword">on</span> duplicate key update `clinic`.`bookingproperty`.`bookingId` <span class="operator">=</span> <span class="number">98</span>, `clinic`.`bookingproperty`.`bookingType` <span class="operator">=</span> <span class="number">0</span>, `clinic`.`bookingproperty`.`type` <span class="operator">=</span> <span class="number">0</span>, `clinic`.`bookingproperty`.`name` <span class="operator">=</span> <span class="string">&#x27;INSERT_TEST&#x27;</span>, `clinic`.`bookingproperty`.`<span class="keyword">value</span>` <span class="operator">=</span> <span class="string">&#x27;0&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>通过 <code>(1) WAITING FOR THIS LOCK TO BE GRANTED</code> 中的信息：</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lock_mode X locks gap before rec <span class="keyword">insert</span> intention waiting</span><br></pre></td></tr></table></figure>
+
+<p>得知事务 1 等待 ”插入意向锁“；</p>
+<ol start="4">
+<li>通过 <code>(2) HOLDS THE LOCK(S)</code> 中的信息：</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lock_mode X locks gap before rec</span><br></pre></td></tr></table></figure>
+
+<p>得知事务 2 持有 ”间隙锁“；</p>
+<ol start="5">
+<li>通过 <code>(2) WAITING FOR THIS LOCK TO BE GRANTED</code> 中的信息：</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lock_mode X locks gap before rec <span class="keyword">insert</span> intention waiting</span><br></pre></td></tr></table></figure>
+
+<p>得知事务 2 等待 ”插入意向锁“；</p>
+<p>分析得知：<strong>两个事务同时持有间隙锁，等待插入意向锁，形成死锁</strong></p>
+<h5 id="规则"><a href="#规则" class="headerlink" title="规则"></a>规则</h5><p>在解读死锁日志、找寻死锁发生原因前，我们需要先了解一些相关的约定和规则。</p>
+<ol>
+<li><p>对于几种行锁对应的死锁日志描述如下：</p>
+<ul>
+<li>记录锁（LOCK_REC_NOT_GAP）: lock_mode X locks rec but not gap</li>
+<li>间隙锁（LOCK_GAP）: lock_mode X locks gap before rec</li>
+<li>Next-key 锁（LOCK_ORNIDARY）: lock_mode X</li>
+<li>插入意向锁（LOCK_INSERT_INTENTION）: lock_mode X locks gap before rec insert intention</li>
+</ul>
+</li>
+<li><p><strong>行锁兼容矩阵</strong>（横向是已持有锁，纵向是正在请求的锁）</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>记录锁</th>
+<th>间隙锁</th>
+<th>Next-key 锁</th>
+<th>插入意向锁</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>记录锁</td>
+<td>冲突</td>
+<td></td>
+<td>冲突</td>
+<td></td>
+</tr>
+<tr>
+<td>间隙锁</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Next-key 锁</td>
+<td>冲突</td>
+<td></td>
+<td>冲突</td>
+<td></td>
+</tr>
+<tr>
+<td>插入意向锁</td>
+<td></td>
+<td>冲突</td>
+<td>冲突</td>
+<td></td>
+</tr>
+</tbody></table>
+</li>
+</ol>
+<h4 id="锁机制"><a href="#锁机制" class="headerlink" title="锁机制"></a>锁机制</h4><p>Mysql 的锁机制可以简单划分为：锁模式（lock_mode）和 锁类型（lock_type）</p>
+<h5 id="锁模式"><a href="#锁模式" class="headerlink" title="锁模式"></a>锁模式</h5><ul>
+<li><p>LOCK_S：读锁：</p>
+<p>共享锁（Share locaks, S 锁），其他事务可读取，不能修改。可以同时有多个事务对记录加读锁。</p>
+</li>
+<li><p>LOCK_X：写锁</p>
+<p>排他锁（Exclusive locks, X 锁），其他事务都不可以读取和修改，同一时间只能有一个事务加写锁。</p>
+</li>
+<li><p>LOCK_IS：读意向锁</p>
+</li>
+<li><p>LOCK_IX：写意向锁</p>
+<p>表级锁，当事务试图读或写某一条记录时，会先在表上加上意向锁，然后在要操作的记录上加读锁或写锁。这样可以很方便地判断表中是否有记录加锁。</p>
+</li>
+<li><p>LOCK_AUTO_INC：自增锁</p>
+<p>简称 AI 锁，当插入数据且表中有自增列时，会在生成自增值前为该表加 AI 锁。</p>
+</li>
+</ul>
+<h5 id="锁类型"><a href="#锁类型" class="headerlink" title="锁类型"></a>锁类型</h5><p>锁类型可以分为表锁和行锁。表锁会对整张表加锁，由 Mysql 服务器实现。行锁会锁住某一行、某几行或行之间的间隙，由存储引擎实现，如InnoDb。</p>
+<p>下面主要介绍一下上文提到的几种行锁。</p>
+<h6 id="记录锁（Record-Lock）"><a href="#记录锁（Record-Lock）" class="headerlink" title="记录锁（Record Lock）"></a>记录锁（Record Lock）</h6><p>单个行记录下的锁，会锁住索引值记录。如果没有设置索引会使用隐式的主键来锁定。</p>
+<h6 id="间隙锁（Gap-Lock）"><a href="#间隙锁（Gap-Lock）" class="headerlink" title="间隙锁（Gap Lock）"></a>间隙锁（Gap Lock）</h6><p>又称范围锁（Range Locks），加在两个索引之间或第一个索引之前，或者最后一个索引之后。并不锁定索引本身。</p>
+<p>在可重复读隔离级别下才会产生间隙锁, 它可以防止其他事物在加锁范围内插入或修改记录，保证两次读取加锁范围内的记录数据不变，避免幻读发生。</p>
+<blockquote>
+<p>在可重复读隔离级别下，标准的 SQL 规范是会存在幻读问题的，但 MySql 通过间隙锁的技术避免了幻读。但有利也有弊，通过间隙锁虽然解决了幻读问题，但增加了数据库的开销，影响了数据库的并发性能。</p>
+</blockquote>
+<p>产生间隙锁的场景：</p>
+<ul>
+<li><p>使用普通索引</p>
+</li>
+<li><p>使用多列唯一索引</p>
+</li>
+<li><p>使用唯一索引</p>
+<blockquote>
+<p>范围查询，或索引对应记录不存在，会产生间隙锁</p>
+</blockquote>
+</li>
+</ul>
+<p>上文中的间隙锁就是由于使用了多列唯一索引产生的。</p>
+<h6 id="Next-Key-锁（Next-Key-Locks）"><a href="#Next-Key-锁（Next-Key-Locks）" class="headerlink" title="Next-Key 锁（Next-Key Locks）"></a>Next-Key 锁（Next-Key Locks）</h6><p>可以认为是记录锁和间隙锁的组合，既锁定范围，又锁定索引记录本身。</p>
+<h6 id="插入意向锁（Insert-Intention-Locks）"><a href="#插入意向锁（Insert-Intention-Locks）" class="headerlink" title="插入意向锁（Insert Intention Locks）"></a>插入意向锁（Insert Intention Locks）</h6><p>是一种特殊的间隙锁，也简写成 II GAP。与上文中提到的读、写意向锁是两个不同的概念，只会在 INSERT 时才会有这个锁。</p>
+<p>这个时候再来看上文中的<strong>行锁兼容矩阵</strong>， 在持有间隙锁或 Next-key 锁时，请求插入意向锁会有冲突。因为间隙锁的作用就是防止幻读，而正是由于在执行 INSERT 语句时需要加插入意向锁，而插入意向锁和间隙锁冲突，从而阻止了插入操作的执行，进而避免了幻读的产生。</p>
+<h4 id="模拟并发"><a href="#模拟并发" class="headerlink" title="模拟并发"></a>模拟并发</h4><p>为了模拟并发操作，重现死锁问题和测试死锁修复代码。利用 <code>CountDownLatch</code> 简单写了个测试类如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootTest</span></span><br><span class="line"><span class="meta">@RunWith(SpringRunner.class)</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="comment">//@Ignore</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PropertyTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 并发数量</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> THREAD_NUM = <span class="number">100</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">long</span> startTime = <span class="number">0L</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> AtomicInteger atomicInteger = <span class="keyword">new</span> AtomicInteger(<span class="number">0</span>);</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> PropertyTestService propertyTestService;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testConcurrentInsert</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            startTime = System.currentTimeMillis();</span><br><span class="line">            log.info(<span class="string">&quot;test started at: &quot;</span> + startTime);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 初始化计数器</span></span><br><span class="line">            CountDownLatch startLatch = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line">            CountDownLatch endLatch = <span class="keyword">new</span> CountDownLatch(THREAD_NUM);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; THREAD_NUM; i++) &#123;</span><br><span class="line">                <span class="keyword">new</span> Thread(<span class="keyword">new</span> TestRun(startLatch, endLatch)).start();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 启动多个线程</span></span><br><span class="line">            startLatch.countDown();</span><br><span class="line">            endLatch.await();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            Assert.assertFalse(e <span class="keyword">instanceof</span> SQLException);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@After</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        propertyTestService.deleteTestProperty();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 线程类</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@AllArgsConstructor</span></span><br><span class="line">    <span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">TestRun</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> CountDownLatch startLatch;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> CountDownLatch endLatch;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 线程等待</span></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                startLatch.await();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                log.error(e.getMessage());</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 执行操作</span></span><br><span class="line">            propertyTestService.insertTestProperty(atomicInteger.incrementAndGet());</span><br><span class="line"></span><br><span class="line">            <span class="keyword">long</span> endTime = System.currentTimeMillis();</span><br><span class="line">            log.info(Thread.currentThread().getName() + <span class="string">&quot; ended at: &quot;</span> + endTime + <span class="string">&quot;, cost: &quot;</span> + (endTime - startTime) + <span class="string">&quot; ms.&quot;</span>);</span><br><span class="line">            endLatch.countDown();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在 <code>propertyTestService.insertTestProperty</code> 中加了 <code>Thread.sleep(THREAD_SLEEP_TIME)</code> 用来模拟长事务。</p>
+<p>通过测试发现，在较短的事务下，同时发起几十个请求并没有触发死锁问题。而随着事务的加长，死锁的概率也逐渐加大。通过查阅相关代码，发现发生死锁的方法被包在一个大的事务里面，这个事务甚至还包含了多次远程调用。</p>
+<blockquote>
+<p>其实本项目已经对分布式事务做了处理，保证了事物的一致性，同时也避免了长事务的产生。只不过项目较大，开发时间跨度也长，有些地方遗漏了处理。</p>
+</blockquote>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>避免死锁或者减少死锁情况发生及降低死锁损失的方法：</p>
+<ol>
+<li>避免长事务，尽量将长事务拆成多个短事务来处理；因为长事务占用资源多，耗时长，与其他事务冲突的概率也高；</li>
+<li>合理设置索引；</li>
+<li>业务场景允许的情况下，可以减低事务的隔离级别，避免间隙锁的产生；</li>
+<li>如上文场景，可以直接使用 <code>insert</code> 或者 <code>insert ignore</code>；</li>
+<li>设置 <code>innodb_lock_wait_timeout</code>，可以避免高并发时大量事务无法获取到锁而挂起，从而引发更严重的问题；</li>
+<li>业务场景允许的情况下可以使用悲观锁。</li>
+</ol>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://niuzaishu.top">xiao niu</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://niuzaishu.top/blogs/%E8%AE%B0%E4%B8%80%E6%AC%A1%20MySql%20%E6%95%B0%E6%8D%AE%E5%BA%93%E6%AD%BB%E9%94%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E8%BF%87%E7%A8%8B/">https://niuzaishu.top/blogs/%E8%AE%B0%E4%B8%80%E6%AC%A1%20MySql%20%E6%95%B0%E6%8D%AE%E5%BA%93%E6%AD%BB%E9%94%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E8%BF%87%E7%A8%8B/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        
+        <nav class="post-nav"><a class="next" href="/blogs/%E4%BA%86%E8%A7%A3%E4%B8%80%E4%B8%8B%E7%AC%AC%E4%B8%89%E6%96%B9%E7%99%BB%E5%BD%95/">
+        <span class="next-text nav-default">了解一下第三方登录</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:niuzaishu@gmail.com" class="iconfont icon-email" title="email"></a>
+        <a target="_blank" rel="noopener" href="https://github.com/niuzaishu" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2021<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">xiao niu</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>
