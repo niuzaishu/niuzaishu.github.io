@@ -82,6 +82,96 @@
         <div class="content-wrapper">
           <div id="content" class="content"><section id="posts" class="posts"><article class="post">
     <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/Java%E8%AF%8A%E6%96%AD%E5%88%A9%E5%99%A8%20Arthas/">Java诊断利器 Arthas</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><h3 id="Java诊断利器-Arthas"><a href="#Java诊断利器-Arthas" class="headerlink" title="Java诊断利器 Arthas"></a>Java诊断利器 Arthas</h3><p>Arthas（阿尔萨斯）是阿里巴巴开源的 Java 诊断工具，当你遇到以下类似问题而束手无策时，<code>Arthas</code>可以帮助你解决：</p>
+<ol>
+<li>这个类从哪个 jar 包加载的？为什么会报各种类相关的 Exception？</li>
+<li>我改的代码为什么没有执行到？难道是我没 commit？分支搞错了？</li>
+<li>遇到问题无法在线上 debug，难道只能通过加日志再重新发布吗？</li>
+<li>线上遇到某个用户的数据处理有问题，但线上同样无法 debug，线下无法重现！</li>
+<li>是否有一个全局视角来查看系统的运行状况？</li>
+<li>有什么办法可以监控到JVM的实时运行状态？</li>
+<li>怎么快速定位应用的热点，生成火焰图？</li>
+</ol>
+          <div class="read-more">
+            <a href="/blogs/Java%E8%AF%8A%E6%96%AD%E5%88%A9%E5%99%A8%20Arthas/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/%E9%94%81%E5%9F%BA%E7%A1%80/">锁基础</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><p><strong>显式锁</strong></p>
+<p>Java 5.0 之前：synchronnized 和volatile</p>
+<p>Java 5.0：增加 显式锁</p>
+<h2 id="1-Lock-与-ReentrantLock-p227"><a href="#1-Lock-与-ReentrantLock-p227" class="headerlink" title="1. Lock 与 ReentrantLock p227"></a>1. Lock 与 ReentrantLock p227</h2><h4 id="Lock-接口"><a href="#Lock-接口" class="headerlink" title="Lock 接口"></a>Lock 接口</h4><ol>
+<li>无条件、可轮询、定时、可中断的加锁操作</li>
+<li>显式的加锁和解锁的方法</li>
+</ol>
+          <div class="read-more">
+            <a href="/blogs/%E9%94%81%E5%9F%BA%E7%A1%80/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9A/">数据绑定</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><h4 id="数据绑定"><a href="#数据绑定" class="headerlink" title="数据绑定"></a>数据绑定</h4><p>单向绑定非常简单，就是把Model绑定到View，当我们用JavaScript代码更新Model时，View就会自动更新。</p>
+<p>有单向绑定，就有双向绑定。如果用户更新了View，Model的数据也自动被更新了，这种情况就是双向绑定。</p>
+          <div class="read-more">
+            <a href="/blogs/%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9A/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80%EF%BC%88%E4%BA%8C%EF%BC%89/">线程基础（二）</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><h4 id="1-理解线程上下文切换"><a href="#1-理解线程上下文切换" class="headerlink" title="1. 理解线程上下文切换"></a>1. 理解线程上下文切换</h4><p>在多线程编程中，线程个数一般要大于CPU 个数，而每个CPU 同一时刻只能被一个线程使用。为了让用户感觉多个线程是在同时执行的，CPU 资源的分配采用了时间片轮询的策略。</p>
+<p>也就是说，给每个线程分配一个时间片，<strong>线程在时间片内占用CPU 执行任务，当前线程使用完时间片后，就会处于就绪状态并让出CPU 让其他线程占用，这就是上下文切换</strong></p>
+<p>线程上下文切换的时机：当前线程的CPU<strong>时间片使用完处于就绪状态时</strong>，当前<strong>线程被其他线程中断</strong>时</p>
+          <div class="read-more">
+            <a href="/blogs/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80%EF%BC%88%E4%BA%8C%EF%BC%89/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/blogs/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80%EF%BC%88%E4%B8%80%EF%BC%89/">线程基础（一）</a>
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-content"><p>[TOC]</p>
+<h4 id="1-什么是线程"><a href="#1-什么是线程" class="headerlink" title="1. 什么是线程"></a>1. 什么是线程</h4><p>线程本身不会独立存在，它是进程中的一个实体。</p>
+<blockquote>
+<p>进程：是系统进行资源分配和调度的基本单位，是代码在数据集合上的一次运行活动。</p>
+<p>线程：是进程的一个执行路径，是CPU 分配的基本单位。一个进程中至少有一个线程，多个线程共享进程的资源</p>
+</blockquote>
+<p>例;在Java中启动main 函数时，其实是启用了一个JVM 进程，而main函数所在的线程就是这个这个进程中的一个线程，也称主线程、</p>
+<p>多个线程共享进程的堆和方法区资源，但是各个线程有自己的程序计数器和栈区域。</p>
+          <div class="read-more">
+            <a href="/blogs/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80%EF%BC%88%E4%B8%80%EF%BC%89/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
       <h1 class="post-title"><a class="post-link" href="/blogs/CQRS%20%E4%B8%8E%20Event%20Sourcing/">CQRS 与 Event Sourcing</a>
         </h1>
 
@@ -160,94 +250,6 @@
 <p>那么 <code>0x61c88647</code> 是怎么起作用的呢？</p>
           <div class="read-more">
             <a href="/blogs/%E4%BB%8E%20ThreadLocal%20%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%9C%8B%E6%95%A3%E5%88%97%E7%AE%97%E6%B3%95/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/blogs/Spring%20%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">Spring 事务隔离级别</a>
-        </h1>
-
-      <div class="post-meta"></div>
-    </header>
-
-    <div class="post-content"><h3 id="Spring-事务隔离级别"><a href="#Spring-事务隔离级别" class="headerlink" title="Spring 事务隔离级别"></a>Spring 事务隔离级别</h3><h4 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h4><p>事务逻辑上的一组操作，组成这组操作的各个逻辑单元，要么一起成功，要么一起失败。</p>
-<h4 id="事务特性-ACID"><a href="#事务特性-ACID" class="headerlink" title="事务特性 ACID"></a>事务特性 ACID</h4><ul>
-<li>原子性（Atomicity）：不可分割，事务是不可分割的最小工作单元，事务内的操作要么全做，要么全不对。</li>
-<li>一致性（Consistency）：事务的执行前后数据的完整性保持一致。</li>
-<li>隔离性（Isolation）：并发事务执行之间互不影响，在一个事务内部的操作对其他事务是不产生影响的。</li>
-<li>持久性（Durability）：事务一旦执行成功，它对数据库的改变必须是永久的</li>
-</ul>
-          <div class="read-more">
-            <a href="/blogs/Spring%20%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/blogs/%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/">策略模式</a>
-        </h1>
-
-      <div class="post-meta"></div>
-    </header>
-
-    <div class="post-content"><h3 id="策略模式"><a href="#策略模式" class="headerlink" title="策略模式"></a>策略模式</h3><h4 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h4><p>将不同业务规则封装成不同算法，并且它们可以相互替换，实现业务逻辑与调用方逻辑的解耦合。</p>
-<h4 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h4><ol>
-<li>统一操作有不同业务处理</li>
-<li>业务处理逻辑需要动态切换</li>
-<li>对象有多个行为，需要通过多重条件判断来确定具体行为</li>
-</ol>
-          <div class="read-more">
-            <a href="/blogs/%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/blogs/Actor%20%E6%A8%A1%E5%9E%8B%E5%8F%8A%20Akka%20%E7%AE%80%E4%BB%8B/">Actor 模型及 Akka 简介</a>
-        </h1>
-
-      <div class="post-meta"></div>
-    </header>
-
-    <div class="post-content"><h3 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h3><p>随着业务的发展，现代分布式系统对于垂直扩展、水平扩展、容错性的要求越来越高。常见的一些编程模式已经不能很好的解决这些问题。</p>
-<p>解决并发问题核心是并发线程中的数据通讯问题，一般有两种策略：</p>
-<ol>
-<li>共享数据</li>
-<li>消息传递</li>
-</ol>
-          <div class="read-more">
-            <a href="/blogs/Actor%20%E6%A8%A1%E5%9E%8B%E5%8F%8A%20Akka%20%E7%AE%80%E4%BB%8B/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/blogs/Java-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%8D%95%E4%BE%8B/">Java 设计模式之单例</a>
-        </h1>
-
-      <div class="post-meta"></div>
-    </header>
-
-    <div class="post-content"><h3 id="Java-设计模式之单例"><a href="#Java-设计模式之单例" class="headerlink" title="Java 设计模式之单例"></a>Java 设计模式之单例</h3><p>总体来说设计模式分为三大类：创建型模式，结构型模式，行为型模式</p>
-<p>单例模式属于创建型模式。可以保证一个类仅有一个实例，并提供一个访问它的全局访问点。</p>
-<h4 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h4><ol>
-<li>在内存中只有一个实例，可以减少了内存的开销</li>
-<li>避免对资源的多重占用</li>
-<li>可以在不直接关联的情况下，用于数据共享</li>
-</ol>
-          <div class="read-more">
-            <a href="/blogs/Java-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%8D%95%E4%BE%8B/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/blogs/%E9%80%9A%E8%BF%87%E6%BA%90%E7%A0%81%E5%88%9D%E6%8E%A2Scala-Future/">通过源码初探Scala Future</a>
-        </h1>
-
-      <div class="post-meta"></div>
-    </header>
-
-    <div class="post-content"><p>一个Future可以认为代表了一次异步计算的操作。在Scala中可以很简单地使用Future进行异步处理。</p>
-<p>Future从字面意思可以理解为将来得到的结果，那么是怎样实现的呢？</p>
-          <div class="read-more">
-            <a href="/blogs/%E9%80%9A%E8%BF%87%E6%BA%90%E7%A0%81%E5%88%9D%E6%8E%A2Scala-Future/" class="read-more-link">阅读更多</a>
           </div>
         </div></article>
       <nav class="pagination"><a class="next" href="/page/2/">

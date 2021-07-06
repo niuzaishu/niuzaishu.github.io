@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="Java诊断利器 Arthas"/><link rel="alternate" href="/default" title="小牛" ><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://niuzaishu.top/blogs/Java诊断利器 Arthas/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>Java诊断利器 Arthas - 小牛</title>
+  <meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">小牛</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a><a href="/archives/">
+        <li class="mobile-menu-item">归档
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">小牛</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            归档
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">Java诊断利器 Arthas
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Java%E8%AF%8A%E6%96%AD%E5%88%A9%E5%99%A8-Arthas"><span class="toc-text">Java诊断利器 Arthas</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80-%E5%AE%89%E8%A3%85-amp-%E8%BF%90%E8%A1%8C"><span class="toc-text">一. 安装&amp;运行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-text">二. 常用命令</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-1-dashboard"><span class="toc-text">2.1 dashboard</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-2-thread"><span class="toc-text">2.2 thread</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3-jvm-%E5%8F%82%E6%95%B0"><span class="toc-text">2.3 jvm 参数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-4-sc"><span class="toc-text">2.4 sc</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-5-sm"><span class="toc-text">2.5 sm</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-6-heapdump"><span class="toc-text">2.6 heapdump</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-7-jad-mc-redefine"><span class="toc-text">2.7 jad, mc, redefine</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-8-monitor"><span class="toc-text">2.8 monitor</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-9-watch"><span class="toc-text">2.9 watch</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-10-trace-stack-tt"><span class="toc-text">2.10 trace, stack, tt</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-11-profiler"><span class="toc-text">2.11 profiler</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89-%E5%85%B6%E4%BB%96"><span class="toc-text">三. 其他</span></a></li></ol></li></ol>
+    </div>
+  </div><div class="post-content"><h3 id="Java诊断利器-Arthas"><a href="#Java诊断利器-Arthas" class="headerlink" title="Java诊断利器 Arthas"></a>Java诊断利器 Arthas</h3><p>Arthas（阿尔萨斯）是阿里巴巴开源的 Java 诊断工具，当你遇到以下类似问题而束手无策时，<code>Arthas</code>可以帮助你解决：</p>
+<ol>
+<li>这个类从哪个 jar 包加载的？为什么会报各种类相关的 Exception？</li>
+<li>我改的代码为什么没有执行到？难道是我没 commit？分支搞错了？</li>
+<li>遇到问题无法在线上 debug，难道只能通过加日志再重新发布吗？</li>
+<li>线上遇到某个用户的数据处理有问题，但线上同样无法 debug，线下无法重现！</li>
+<li>是否有一个全局视角来查看系统的运行状况？</li>
+<li>有什么办法可以监控到JVM的实时运行状态？</li>
+<li>怎么快速定位应用的热点，生成火焰图？</li>
+</ol>
+<span id="more"></span>
+
+<h4 id="一-安装-amp-运行"><a href="#一-安装-amp-运行" class="headerlink" title="一. 安装&amp;运行"></a>一. 安装&amp;运行</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -O https://alibaba.github.io/arthas/arthas-boot.jar</span><br><span class="line">java -jar arthas-boot.jar</span><br></pre></td></tr></table></figure>
+
+<p>或者</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -L https://alibaba.github.io/arthas/install.sh | sh</span><br><span class="line">./as.sh</span><br></pre></td></tr></table></figure>
+
+<p>选择已经运行的 JVM 进程</p>
+<p><img src="https://niuzaishu.oss-cn-shanghai.aliyuncs.com/img/blog/image-20210707005903370.png" alt="image-20210707005903370"></p>
+<p>启动成功</p>
+<p><img src="https://niuzaishu.oss-cn-shanghai.aliyuncs.com/img/blog/image-20210707005922185.png" alt="image-20210707005922185"></p>
+<p>Arthas目前支持Web Console，用户在attach成功之后，可以直接访问：<a target="_blank" rel="noopener" href="http://127.0.0.1:3658/">http://127.0.0.1:3658/</a></p>
+<h4 id="二-常用命令"><a href="#二-常用命令" class="headerlink" title="二. 常用命令"></a>二. 常用命令</h4><h5 id="2-1-dashboard"><a href="#2-1-dashboard" class="headerlink" title="2.1 dashboard"></a>2.1 dashboard</h5><p><img src="https://niuzaishu.oss-cn-shanghai.aliyuncs.com/img/blog/image-20210707005938614.png" alt="image-20210707005938614"></p>
+<ul>
+<li>ID: Java级别的线程ID，注意这个ID不能跟jstack中的nativeID一一对应</li>
+<li>NAME: 线程名</li>
+<li>GROUP: 线程组名</li>
+<li>PRIORITY: 线程优先级, 1~10之间的数字，越大表示优先级越高</li>
+<li>STATE: 线程的状态</li>
+<li>CPU%: 线程消耗的cpu占比，采样100ms，将所有线程在这100ms内的cpu使用量求和，再算出每个线程的cpu使用占比。</li>
+<li>TIME: 线程运行总时间，数据格式为<code>分：秒</code></li>
+<li>INTERRUPTED: 线程当前的中断位状态</li>
+<li>DAEMON: 是否是daemon线程</li>
+</ul>
+<h5 id="2-2-thread"><a href="#2-2-thread" class="headerlink" title="2.2 thread"></a>2.2 thread</h5><table>
+<thead>
+<tr>
+<th><em>id</em></th>
+<th>线程id</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>[n:]</td>
+<td>指定最忙的前N个线程并打印堆栈</td>
+</tr>
+<tr>
+<td>[b]</td>
+<td>找出当前阻塞其他线程的线程</td>
+</tr>
+<tr>
+<td>[state]</td>
+<td>指定状态</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">thread 499</span><br><span class="line"></span><br><span class="line">thread -n 10</span><br><span class="line"></span><br><span class="line">thread -b</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-3-jvm-参数"><a href="#2-3-jvm-参数" class="headerlink" title="2.3 jvm 参数"></a>2.3 jvm 参数</h5><ul>
+<li><p>jvm 查看当前JVM信息</p>
+</li>
+<li><p>sysprop 查看当前JVM的系统属性(<code>System Property</code>)</p>
+</li>
+<li><p>sysenv 查看当前JVM的环境属性(<code>System Environment Variables</code>)</p>
+</li>
+<li><p>vmoption 查看，更新VM诊断相关的参数</p>
+</li>
+<li><p>logger 查看logger信息</p>
+</li>
+</ul>
+<h5 id="2-4-sc"><a href="#2-4-sc" class="headerlink" title="2.4 sc"></a>2.4 sc</h5><p>查看JVM已加载的类信息</p>
+<table>
+<thead>
+<tr>
+<th>参数名称</th>
+<th>参数说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><em>class-pattern</em></td>
+<td>类名表达式匹配</td>
+</tr>
+<tr>
+<td><em>method-pattern</em></td>
+<td>方法名表达式匹配</td>
+</tr>
+<tr>
+<td>[d]</td>
+<td>输出当前类的详细信息，包括这个类所加载的原始文件来源、类的声明、加载的ClassLoader等详细信息。 如果一个类被多个ClassLoader所加载，则会出现多次</td>
+</tr>
+<tr>
+<td>[E]</td>
+<td>开启正则表达式匹配，默认为通配符匹配</td>
+</tr>
+<tr>
+<td>[f]</td>
+<td>输出当前类的成员变量信息（需要配合参数-d一起使用）</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sc -d -f  *.BookingItemVO</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-5-sm"><a href="#2-5-sm" class="headerlink" title="2.5 sm"></a>2.5 sm</h5><p>查看已加载类的方法信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sm -d *.BookingItemVO</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-6-heapdump"><a href="#2-6-heapdump" class="headerlink" title="2.6 heapdump"></a>2.6 heapdump</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">heapdump /tmp/dump.hprof</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-7-jad-mc-redefine"><a href="#2-7-jad-mc-redefine" class="headerlink" title="2.7 jad, mc, redefine"></a>2.7 jad, mc, redefine</h5><ul>
+<li>Jad </li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jad --source-only com.xingren.clinic.services.booking.BookingService </span><br><span class="line"></span><br><span class="line">jad --source-only com.xingren.clinic.services.booking.BookingService &gt; tmp/BookingService.java</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>有泛型丢失问题</p>
+</blockquote>
+<ul>
+<li>mc</li>
+</ul>
+<p>Memory Compiler/内存编译器，编译<code>.java</code>文件生成<code>.class</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mc /tmp/BookingService.java -d /tmp</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>redefine</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redefine /tmp/com/xingren/clinic/services/booking/BookingService.class</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-8-monitor"><a href="#2-8-monitor" class="headerlink" title="2.8 monitor"></a>2.8 monitor</h5><p>方法执行监控</p>
+<table>
+<thead>
+<tr>
+<th>监控项</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>timestamp</td>
+<td>时间戳</td>
+</tr>
+<tr>
+<td>class</td>
+<td>Java类</td>
+</tr>
+<tr>
+<td>method</td>
+<td>方法（构造方法、普通方法）</td>
+</tr>
+<tr>
+<td>total</td>
+<td>调用次数</td>
+</tr>
+<tr>
+<td>success</td>
+<td>成功次数</td>
+</tr>
+<tr>
+<td>fail</td>
+<td>失败次数</td>
+</tr>
+<tr>
+<td>rt</td>
+<td>平均RT</td>
+</tr>
+<tr>
+<td>fail-rate</td>
+<td>失败率</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>参数名称</th>
+<th>参数说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><em>class-pattern</em></td>
+<td>类名表达式匹配</td>
+</tr>
+<tr>
+<td><em>method-pattern</em></td>
+<td>方法名表达式匹配</td>
+</tr>
+<tr>
+<td>[c:]`</td>
+<td>统计周期，默认值为120秒</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">monitor -c 10 *.BookingService *</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-9-watch"><a href="#2-9-watch" class="headerlink" title="2.9 watch"></a>2.9 watch</h5><p>方法执行数据观测</p>
+<table>
+<thead>
+<tr>
+<th>参数名称</th>
+<th>参数说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><em>class-pattern</em></td>
+<td>类名表达式匹配</td>
+</tr>
+<tr>
+<td><em>method-pattern</em></td>
+<td>方法名表达式匹配</td>
+</tr>
+<tr>
+<td><em>express</em></td>
+<td>观察表达式</td>
+</tr>
+<tr>
+<td><em>condition-express</em></td>
+<td>条件表达式</td>
+</tr>
+<tr>
+<td>[b]</td>
+<td>在<strong>方法调用之前</strong>观察</td>
+</tr>
+<tr>
+<td>[e]</td>
+<td>在<strong>方法异常之后</strong>观察</td>
+</tr>
+<tr>
+<td>[s]</td>
+<td>在<strong>方法返回之后</strong>观察</td>
+</tr>
+<tr>
+<td>[f]</td>
+<td>在<strong>方法结束之后</strong>(正常返回和异常返回)观察</td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">watch com.xingren.clinic.controllers.booking.BookingController listBookingWithCondition &#x27;&#123;params,returnObj,throwExp&#125;&#x27; -x 1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">watch com.xingren.clinic.controllers.booking.BookingController listBookingWithCondition &#x27;&#123;params,returnObj,throwExp&#125;&#x27; -x 2</span><br><span class="line"></span><br><span class="line">watch com.xingren.clinic.controllers.booking.BookingController listBookingWithCondition &#x27;&#123;params,returnObj,throwExp&#125;&#x27; -x 2 &#x27;params[0].doctorId == 7712&#x27;</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-10-trace-stack-tt"><a href="#2-10-trace-stack-tt" class="headerlink" title="2.10 trace, stack, tt"></a>2.10 trace, stack, tt</h5><p>trace : 方法内部调用路径，并输出方法路径上的每个节点上耗时</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">trace *.BookingService *</span><br></pre></td></tr></table></figure>
+
+<p>stack: 输出当前方法被调用的调用路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stack *.BookingService *</span><br></pre></td></tr></table></figure>
+
+<p>tt: 方法执行数据的时空隧道，记录下指定方法每次调用的入参和返回信息，并能对这些不同的时间下调用进行观测</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tt -t *.BookingService listBookingByPage</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>表格字段</th>
+<th>字段解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>INDEX</td>
+<td>时间片段记录编号，每一个编号代表着一次调用，后续tt还有很多命令都是基于此编号指定记录操作，非常重要。</td>
+</tr>
+<tr>
+<td>TIMESTAMP</td>
+<td>方法执行的本机时间，记录了这个时间片段所发生的本机时间</td>
+</tr>
+<tr>
+<td>COST(ms)</td>
+<td>方法执行的耗时</td>
+</tr>
+<tr>
+<td>IS-RET</td>
+<td>方法是否以正常返回的形式结束</td>
+</tr>
+<tr>
+<td>IS-EXP</td>
+<td>方法是否以抛异常的形式结束</td>
+</tr>
+<tr>
+<td>OBJECT</td>
+<td>执行对象的<code>hashCode()</code>，注意，曾经有人误认为是对象在JVM中的内存地址，但很遗憾他不是。但他能帮助你简单的标记当前执行方法的类实体</td>
+</tr>
+<tr>
+<td>CLASS</td>
+<td>执行的类名</td>
+</tr>
+<tr>
+<td>METHOD</td>
+<td>执行的方法名</td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tt -i 1000</span><br></pre></td></tr></table></figure>
+
+<p>查看单个 index</p>
+<h5 id="2-11-profiler"><a href="#2-11-profiler" class="headerlink" title="2.11 profiler"></a>2.11 profiler</h5><p>火焰图</p>
+<table>
+<thead>
+<tr>
+<th>Basic events:</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td>cpu</td>
+</tr>
+<tr>
+<td></td>
+<td>alloc</td>
+</tr>
+<tr>
+<td></td>
+<td>lock</td>
+</tr>
+<tr>
+<td></td>
+<td>wall</td>
+</tr>
+<tr>
+<td></td>
+<td>itimer</td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">profiler start --event alloc</span><br><span class="line"></span><br><span class="line">profiler stop</span><br><span class="line"></span><br><span class="line">profiler resume</span><br></pre></td></tr></table></figure>
+
+<p> <code>start</code>和<code>resume</code>的区别是：<code>start</code>是新开始采样，<code>resume</code>会保留上次<code>stop</code>时的数据。</p>
+<p><a target="_blank" rel="noopener" href="http://localhost:3658/arthas-output/">http://localhost:3658/arthas-output/</a> </p>
+<blockquote>
+<p> 颜色是随机的, 本身并没有特殊的含义,</p>
+<p> y 轴表示调用栈, 每一层都是一个函数. 调用栈越深, 火焰就越高, 顶部就是正在执行的函数, 下方都是它的父函数.</p>
+<p> x 轴表示抽样数, 如果一个函数在 x 轴占据的宽度越宽, 就表示它被抽到的次数多, 即执行的时间长. 注意, x 轴不代表时间, 而是所有的调用栈合并后, 按字母顺序排列的.<br> 火焰图就是看顶层的哪个函数占据的宽度最大. 只要有 “平顶”(plateaus), 就表示该函数可能存在性能问题。<br> 颜色没有特殊含义, 因为火焰图表示的是 CPU 的繁忙程度, 所以一般选择暖色调.</p>
+<p> 火焰的每一层都会标注函数名, 鼠标悬浮时会显示完整的函数名、抽样抽中的次数、占据总抽样次数的百分比</p>
+</blockquote>
+<h4 id="三-其他"><a href="#三-其他" class="headerlink" title="三. 其他"></a>三. 其他</h4><ul>
+<li><p>arthas idea plugin </p>
+</li>
+<li><p>Instrumentation 与 attach 机制</p>
+<blockquote>
+<p>Java Instrumentation 是 JDK5 之后提供接口。使用这组接口，我们可以获取到正在运行 JVM 相关信息，使用这些信息我们构建相关监控程序检测 JVM。另外， 最重要我们可以<strong>替换</strong>和<strong>修改</strong>类的，这样就实现了热更新。</p>
+<p>Attach API 位于 tools.jar 包，可以用来连接目标 JVM。,底层则是通过 <code>JVMTI</code></p>
+<p>JVMTI是一个programming interface，主要用在开发和监控上。而且它提供了接口去观察(inspect) 应用状态和控制应用的执行。工具通过它提供的接口，可以进行如下功能的实现：</p>
+<ul>
+<li>profiling</li>
+<li>debuging</li>
+<li>monitoring</li>
+<li>thread analysis</li>
+<li>coverage analysis</li>
+</ul>
+</blockquote>
+</li>
+<li><p>ASM</p>
+<blockquote>
+<p>ASM是一个Java字节码操作框架，用来动态生成class或者增强class，cglib的底层就是它，arthas也是通过它实现对class的增强的, 从而实现 watch，trace等效果</p>
+</blockquote>
+</li>
+<li><p>Async profiler</p>
+<blockquote>
+<p>一个低开销的Java运行时采样分析器（不进入安全点，不造成应用停顿），它依赖Hotspots的特定API AsyncGetCallTrace， 配合Linux perf_events机制，异步采集热点方法调用栈（包括Java方法，JVM Native方法与系统调用）的相关信息</p>
+</blockquote>
+</li>
+</ul>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://niuzaishu.top">xiao niu</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://niuzaishu.top/blogs/Java%E8%AF%8A%E6%96%AD%E5%88%A9%E5%99%A8%20Arthas/">https://niuzaishu.top/blogs/Java%E8%AF%8A%E6%96%AD%E5%88%A9%E5%99%A8%20Arthas/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        
+        <nav class="post-nav"><a class="next" href="/blogs/%E9%94%81%E5%9F%BA%E7%A1%80/">
+        <span class="next-text nav-default">锁基础</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:niuzaishu@gmail.com" class="iconfont icon-email" title="email"></a>
+        <a target="_blank" rel="noopener" href="https://github.com/niuzaishu" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2021<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">xiao niu</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="线程基础（二）"/><link rel="alternate" href="/default" title="小牛" ><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://niuzaishu.top/blogs/线程基础（二）/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>线程基础（二） - 小牛</title>
+  <meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">小牛</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a><a href="/archives/">
+        <li class="mobile-menu-item">归档
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">小牛</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            归档
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">线程基础（二）
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E7%90%86%E8%A7%A3%E7%BA%BF%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2"><span class="toc-text">1. 理解线程上下文切换</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E7%BA%BF%E7%A8%8B%E6%AD%BB%E9%94%81"><span class="toc-text">2 线程死锁</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-1-%E4%BB%80%E4%B9%88%E6%98%AF%E7%BA%BF%E7%A8%8B%E6%AD%BB%E9%94%81"><span class="toc-text">2.1 什么是线程死锁</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-2-%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E6%AD%BB%E9%94%81"><span class="toc-text">2.2 如何避免死锁</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%AE%88%E6%8A%A4%E7%BA%BF%E7%A8%8B%E4%B8%8E%E7%94%A8%E6%88%B7%E7%BA%BF%E7%A8%8B"><span class="toc-text">3 守护线程与用户线程</span></a></li></ol>
+    </div>
+  </div><div class="post-content"><h4 id="1-理解线程上下文切换"><a href="#1-理解线程上下文切换" class="headerlink" title="1. 理解线程上下文切换"></a>1. 理解线程上下文切换</h4><p>在多线程编程中，线程个数一般要大于CPU 个数，而每个CPU 同一时刻只能被一个线程使用。为了让用户感觉多个线程是在同时执行的，CPU 资源的分配采用了时间片轮询的策略。</p>
+<p>也就是说，给每个线程分配一个时间片，<strong>线程在时间片内占用CPU 执行任务，当前线程使用完时间片后，就会处于就绪状态并让出CPU 让其他线程占用，这就是上下文切换</strong></p>
+<p>线程上下文切换的时机：当前线程的CPU<strong>时间片使用完处于就绪状态时</strong>，当前<strong>线程被其他线程中断</strong>时</p>
+<span id="more"></span>
+
+<h4 id="2-线程死锁"><a href="#2-线程死锁" class="headerlink" title="2 线程死锁"></a>2 线程死锁</h4><h5 id="2-1-什么是线程死锁"><a href="#2-1-什么是线程死锁" class="headerlink" title="2.1 什么是线程死锁"></a>2.1 什么是线程死锁</h5><p>死锁是<strong>指两个或两个以上的线程在执行过程中，因争夺资源而造成的互相等待的现象</strong>，在无外力的情况下，这些线程会一直相互等待而无法继续运行下去。</p>
+<p><img src="https://niuzaishu.oss-cn-shanghai.aliyuncs.com/img/blog/image-20210707004244788.png" alt="image-20210707004244788"></p>
+<p>产生死锁必须具备以下四个必备条件：</p>
+<ul>
+<li>互斥条件：指线程对已经获取到的资源进行排他性使用。即该资源同时只由一个线程占用，如果此时还有其他线程请求获取该资源，则请求者只能等待，直至占有资源的线程释放该资源</li>
+<li>请求并持有条件：指当一个线程已经持有了至少一个资源，但又提出来新的资源请求。而新资源已被其他线程占有，所以当前线程会被阻塞，但阻塞的同时并不释放自己已经获取到的资源</li>
+<li>不可剥夺条件：指线程获取到的资源在自己使用完之前不能被其他线程抢占，只要在自己使用完毕后，才由自己释放</li>
+<li>环路等待：指在发生死锁时，必然存在一个线程-资源的环形链。即想成集合【T0,T1,T2…Tn】中的T0 等待T1占用的资源，T1 等待T2占用的资源，….Tn 正在等待已被T0 占用的资源</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建资源</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Object resourceA = <span class="keyword">new</span> Object();</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Object resourceB = <span class="keyword">new</span> Object();</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    Thread threadA = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="meta">@SneakyThrows</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (resourceA) &#123;</span><br><span class="line">                System.out.println(Thread.currentThread() + <span class="string">&quot; get resourceA&quot;</span>);</span><br><span class="line"></span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">                System.out.println(Thread.currentThread() + <span class="string">&quot; waiting resourceB&quot;</span>);</span><br><span class="line">                <span class="keyword">synchronized</span> (resourceB) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread() + <span class="string">&quot; get ResourceB&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    Thread threadB = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="meta">@SneakyThrows</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (resourceB) &#123;</span><br><span class="line">                System.out.println(Thread.currentThread() + <span class="string">&quot; get resourceB&quot;</span>);</span><br><span class="line"></span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">                System.out.println(Thread.currentThread() + <span class="string">&quot; waiting resourceA&quot;</span>);</span><br><span class="line">                <span class="keyword">synchronized</span> (resourceA) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread() + <span class="string">&quot; get ResourceA&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    threadA.start();</span><br><span class="line">    threadB.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Thread[Thread-0,5,main] get resourceA</span><br><span class="line">Thread[Thread-1,5,main] get resourceB</span><br><span class="line">Thread[Thread-0,5,main] waiting resourceB</span><br><span class="line">Thread[Thread-1,5,main] waiting resourceA</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-2-如何避免死锁"><a href="#2-2-如何避免死锁" class="headerlink" title="2.2 如何避免死锁"></a>2.2 如何避免死锁</h5><p>想要避免死锁，<strong>只需要破坏掉任何一个构造死锁的必要条件</strong>就行了，在实际场景中，其实只有请求并持有和环路等待条件是可以被破坏的。</p>
+<p>造成死锁的原因其实和申请资源的顺序有很大关系，使用资源申请的有序性原则就可以避免死锁</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建资源</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Object resourceA = <span class="keyword">new</span> Object();</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Object resourceB = <span class="keyword">new</span> Object();</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    Thread threadA = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="meta">@SneakyThrows</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (resourceA) &#123;</span><br><span class="line">                System.out.println(Thread.currentThread() + <span class="string">&quot; get resourceA&quot;</span>);</span><br><span class="line"></span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">                System.out.println(Thread.currentThread() + <span class="string">&quot; waiting resourceB&quot;</span>);</span><br><span class="line">                <span class="keyword">synchronized</span> (resourceB) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread() + <span class="string">&quot; get ResourceB&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    Thread threadB = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="meta">@SneakyThrows</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (resourceA) &#123;</span><br><span class="line">                System.out.println(Thread.currentThread() + <span class="string">&quot; get resourceA&quot;</span>);</span><br><span class="line"></span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">                System.out.println(Thread.currentThread() + <span class="string">&quot; waiting resourceB&quot;</span>);</span><br><span class="line">                <span class="keyword">synchronized</span> (resourceB) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread() + <span class="string">&quot; get ResourceB&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    threadA.start();</span><br><span class="line">    threadB.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Thread[Thread-0,5,main] get resourceA</span><br><span class="line">Thread[Thread-0,5,main] waiting resourceB</span><br><span class="line">Thread[Thread-0,5,main] get ResourceB</span><br><span class="line">Thread[Thread-1,5,main] get resourceA</span><br><span class="line">Thread[Thread-1,5,main] waiting resourceB</span><br><span class="line">Thread[Thread-1,5,main] get ResourceB</span><br></pre></td></tr></table></figure>
+
+<p>如果线程A,B 同时执行到了synchronized(resoureceA) ，只有一个线程可以获取到resourceA 上的监视器锁，假设线程A获取到了，那么线程B就会被阻塞，然后A 获取resourceB 的监视器锁资源并使用后，会先释放resourceB的持有，再释放resourceA 的持有，这时线程B才从阻塞态变成激活状态。</p>
+<p>所以资源的有序性破坏了请求并持有条件和环路等待条件，因此避免了死锁。</p>
+<h4 id="3-守护线程与用户线程"><a href="#3-守护线程与用户线程" class="headerlink" title="3 守护线程与用户线程"></a>3 守护线程与用户线程</h4><p>Java 中的线程分为两类：<strong>守护线程（daemon）线程和用户线程（user）</strong>.</p>
+<p>在JVM 启动时会调用main 函数，main函数所在的线程就是一个用户线程，在JVM 内部海庆东了很多守护线程，例如垃圾回收线程。</p>
+<p>区别：当最后一个非守护线程结束时 JVM 会正常退出，守护线程是否结束不影响JVM 的退出。</p>
+<p>可以通过<code>setDaemon(true)</code>将一个线程设置为守护线程</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    Thread thread = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">for</span>(;;) &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    thread.start();</span><br><span class="line">    System.out.println(<span class="string">&quot;main is over&quot;</span>);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看出运行完成后，JVM 并没有退出。</p>
+<p>可以通过 jps 命令查看当前java进程</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">nzsdeMacBook-Pro:concurrent nzs$ jps</span><br><span class="line">95136 </span><br><span class="line">68658 sbt-launch.jar</span><br><span class="line">22137 Launcher</span><br><span class="line">96328 Launcher</span><br><span class="line">96331 DaemonThread</span><br><span class="line">96444 Jps</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>也可以通过 <code> ps -eaf|grep java</code>查看包含“java”的所有进程</p>
+<p>如果加上 <code>thread.setDaemon(true);</code>会发现 JVM 已经正产退出</p>
+<p>实例：</p>
+<p>在tomcat 的NIO 实现NioEndpoint 中会开启一组接收线程用来接收用户的链接请求以及一组处理线程负责具体的用户请求。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startInternal</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!running) &#123;</span><br><span class="line">        running = <span class="keyword">true</span>;</span><br><span class="line">        paused = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (socketProperties.getProcessorCache() != <span class="number">0</span>) &#123;</span><br><span class="line">            processorCache = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                    socketProperties.getProcessorCache());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (socketProperties.getEventCache() != <span class="number">0</span>) &#123;</span><br><span class="line">            eventCache = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                    socketProperties.getEventCache());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (socketProperties.getBufferPool() != <span class="number">0</span>) &#123;</span><br><span class="line">            nioChannels = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                    socketProperties.getBufferPool());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Create worker collection</span></span><br><span class="line">        <span class="keyword">if</span> (getExecutor() == <span class="keyword">null</span>) &#123;</span><br><span class="line">            createExecutor();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        initializeConnectionLatch();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建处理线程</span></span><br><span class="line">        poller = <span class="keyword">new</span> Poller();</span><br><span class="line">        Thread pollerThread = <span class="keyword">new</span> Thread(poller, getName() + <span class="string">&quot;-ClientPoller&quot;</span>);</span><br><span class="line">        pollerThread.setPriority(threadPriority);</span><br><span class="line">        pollerThread.setDaemon(<span class="keyword">true</span>); <span class="comment">// 设为守护线程</span></span><br><span class="line">        pollerThread.start();</span><br><span class="line"></span><br><span class="line">      	<span class="comment">// 开启接收线程</span></span><br><span class="line">        startAcceptorThread();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">startAcceptorThread</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        acceptor = <span class="keyword">new</span> Acceptor&lt;&gt;(<span class="keyword">this</span>);</span><br><span class="line">        String threadName = getName() + <span class="string">&quot;-Acceptor&quot;</span>;</span><br><span class="line">        acceptor.setThreadName(threadName);</span><br><span class="line">        Thread t = <span class="keyword">new</span> Thread(acceptor, threadName);</span><br><span class="line">        t.setPriority(getAcceptorThreadPriority());</span><br><span class="line">        t.setDaemon(getDaemon()); <span class="comment">// 默认为守护线程</span></span><br><span class="line">        t.start();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>由上可知接收和处理线程都是守护线程，这意味着tomcat 收到shutdown 命令后并没有其他用户线程存在的情况下，tomcat 进程会马上消亡。</p>
+<p>如果希望在<strong>主线程结束后JVM进程马上结束，那么在创建线程时可以将其设置为守护线程</strong>。如果希望在主线程结束之后子线程继续工作，等子线程结束后再让JVM 进程结束，那么将子线程设为用户线程。</p>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://niuzaishu.top">xiao niu</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://niuzaishu.top/blogs/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80%EF%BC%88%E4%BA%8C%EF%BC%89/">https://niuzaishu.top/blogs/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80%EF%BC%88%E4%BA%8C%EF%BC%89/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        
+        <nav class="post-nav"><a class="prev" href="/blogs/%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9A/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">数据绑定</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    <a class="next" href="/blogs/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80%EF%BC%88%E4%B8%80%EF%BC%89/">
+        <span class="next-text nav-default">线程基础（一）</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:niuzaishu@gmail.com" class="iconfont icon-email" title="email"></a>
+        <a target="_blank" rel="noopener" href="https://github.com/niuzaishu" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2021<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">xiao niu</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>

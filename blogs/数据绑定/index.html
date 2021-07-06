@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="数据绑定"/><link rel="alternate" href="/default" title="小牛" ><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://niuzaishu.top/blogs/数据绑定/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>数据绑定 - 小牛</title>
+  <meta name="generator" content="Hexo 5.4.0"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">小牛</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a><a href="/archives/">
+        <li class="mobile-menu-item">归档
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">小牛</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            归档
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">数据绑定
+        </h1>
+
+      <div class="post-meta"></div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9A"><span class="toc-text">数据绑定</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-text">优缺点</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8D%95%E5%90%91%E7%BB%91%E5%AE%9A"><span class="toc-text">单向绑定</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E7%BB%91%E5%AE%9A"><span class="toc-text">双向绑定</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%8C%E5%90%91%E7%BB%91%E5%AE%9A%E5%AE%9E%E7%8E%B0"><span class="toc-text">双向绑定实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B0%8F%E7%A8%8B%E5%BA%8F%E7%89%B9%E6%80%A7"><span class="toc-text">小程序特性</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BB%93%E6%9E%84"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%89%B9%E6%80%A7"><span class="toc-text">特性</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BB%91%E5%AE%9A%E5%AE%9E%E7%8E%B0"><span class="toc-text">绑定实现</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></li></ol>
+    </div>
+  </div><div class="post-content"><h4 id="数据绑定"><a href="#数据绑定" class="headerlink" title="数据绑定"></a>数据绑定</h4><p>单向绑定非常简单，就是把Model绑定到View，当我们用JavaScript代码更新Model时，View就会自动更新。</p>
+<p>有单向绑定，就有双向绑定。如果用户更新了View，Model的数据也自动被更新了，这种情况就是双向绑定。</p>
+<span id="more"></span>
+
+<h4 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h4><h5 id="单向绑定"><a href="#单向绑定" class="headerlink" title="单向绑定"></a>单向绑定</h5><p>单向绑定的优点是相应的可以带来单向数据流，这样做的好处是所有状态变化都可以被记录、跟踪，状态变化通过手动调用通知，源头易追溯，没有“暗箱操作”。</p>
+<p>同时组件数据只有唯一的入口和出口，使得程序更直观更容易理解，有利于应用的可维护性。</p>
+<p>缺点则是代码量会相应的上升，数据的流转过程变长，从而出现很多类似的样板代码。</p>
+<p>同时由于对应用状态独立管理的严格要求(单一的全局store)，在处理局部状态较多的场景时(如用户输入交互较多的“富表单型”应用)，会显得啰嗦及繁琐。</p>
+<h5 id="双向绑定"><a href="#双向绑定" class="headerlink" title="双向绑定"></a>双向绑定</h5><p>优点是在表单交互较多的场景下，会简化大量业务无关的代码。</p>
+<p>缺点就是由于都是“暗箱操作”，我们无法追踪局部状态的变化(虽然大部分情况下我们并不关心)，潜在的行为太多也增加了出错时 debug 的难度。</p>
+<p>同时由于组件数据变化来源入口变得可能不止一个，新手玩家很容易将数据流转方向弄得紊乱，如果再缺乏一些“管制”手段，最后就很容易因为一处错误操作造成应用雪崩。</p>
+<h4 id="双向绑定实现"><a href="#双向绑定实现" class="headerlink" title="双向绑定实现"></a>双向绑定实现</h4><p>视图层的变化主要就是表单控件的用户输入行为造成的，比如input，select，textarea等。那么我们只需要监听一些事件，比如keypress，keydown，keyup，change。然后在事件回调函数中，将变化的值更新到Model中。当然同时，由于Model发生了变化，我们得再次更新一下View。</p>
+<p>而Model的变化监听方式可以有多种，主要有以下几种： </p>
+<ol>
+<li>发布订阅模式（Backbone）</li>
+<li>数据劫持（VueJS，AvalonJS）</li>
+<li>数据脏检查（Angularjs，RegularJS）</li>
+<li>View抽象的脏检查（ReactJS）</li>
+</ol>
+<h4 id="小程序特性"><a href="#小程序特性" class="headerlink" title="小程序特性"></a>小程序特性</h4><h5 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h5><blockquote>
+<p>整个系统分为两块视图层（View）和逻辑层（App Service）</p>
+</blockquote>
+<blockquote>
+<p>框架可以让数据与视图非常简单地保持同步。当做数据修改的时候，只需要在逻辑层修改数据，视图层就会做相应的更新。</p>
+</blockquote>
+<p>视图层： wxml,wxs,wxss<br>逻辑层：js</p>
+<h5 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h5><p>在原生小程序开发中，数据流是单向的，无法双向绑定。小程序要对界面变量赋值，需要用到this.setData这种方法。</p>
+<ol>
+<li>微信小程序是单向绑定</li>
+<li>数据绑定支持的表达式十分简单(即双大括号中的表达式)，目前只支持这四种表达式：算数表达式、关系表达式、字符串连接表达式、三元表达式。</li>
+<li>微信小程序在初始化之后，再对原来的数据对象进行任何更改，都始终不会生效！只能手动调用setData接口明确指明同步哪些键/值至视图层才会触发更新。</li>
+<li>事件冒泡的阻止上，微信小程序只能通过bindtap/bindxxx与catchtap/catchxxx两种不同形式的事件绑定属性在监听时即决定是否阻止事件冒泡。</li>
+</ol>
+<h5 id="绑定实现"><a href="#绑定实现" class="headerlink" title="绑定实现"></a>绑定实现</h5><p>对象状态化，只要对象状态发送变化，就通知页面更新视图元素。 </p>
+<ol>
+<li>识别哪个UI元素被绑定了相应的对象。 </li>
+<li>监视对象状态的变化。 </li>
+<li>将所有变化传播到绑定的视图上。</li>
+</ol>
+<p>事件是视图层到逻辑层的通讯方式。 </p>
+<ol>
+<li>视图由于用户操作，触发事件A </li>
+<li>事件A处理函数中，更新对象A的状态 </li>
+<li>由于对象A状态变化，通知视图A更新</li>
+</ol>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><p>现在流行数据单双向绑定，小程序使用了单向数据流。</p>
+<p>如果采用传统的jQuery方式操作数据和视图，开发效率低，开发者不买账。</p>
+<p>如果采用双向数据流，程序执行效率偏低，而且是逻辑层对象状态不可控。</p>
+<p>总体来说，小程序数据视图单向绑定开发模式，让开发者专注于事件处理上，改变对象状态，实现视图更新。</p>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://niuzaishu.top">xiao niu</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://niuzaishu.top/blogs/%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9A/">https://niuzaishu.top/blogs/%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9A/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        
+        <nav class="post-nav"><a class="prev" href="/blogs/%E9%94%81%E5%9F%BA%E7%A1%80/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">锁基础</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    <a class="next" href="/blogs/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80%EF%BC%88%E4%BA%8C%EF%BC%89/">
+        <span class="next-text nav-default">线程基础（二）</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:niuzaishu@gmail.com" class="iconfont icon-email" title="email"></a>
+        <a target="_blank" rel="noopener" href="https://github.com/niuzaishu" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2021<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">xiao niu</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>
